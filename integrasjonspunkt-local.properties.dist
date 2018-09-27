@@ -1,0 +1,10 @@
+#Fyll inn lokale vedier der de mangler
+#navnet skal være: integrasjonspunkt-local.properties
+
+#eInnsyn
+server.port=9094
+difi.move.org.number=
+
+difi.move.org.keystore.alias=
+difi.move.org.keystore.password=
+difi.move.org.keystore.path=file:///integrasjonspunkt/auth.jks
