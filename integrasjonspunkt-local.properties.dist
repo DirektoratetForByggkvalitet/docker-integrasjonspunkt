@@ -1,10 +1,66 @@
-#Fyll inn lokale vedier der de mangler
-#navnet skal være: integrasjonspunkt-local.properties
+# Sample of all possible properties.
+# Follows spring externalized properties, with relaxed bindings:
+# https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-relaxed-binding
 
-#eInnsyn
+# Integrasjonspunkt properties
+#difi.move.serviceregistryEndpoint=
+#difi.move.varslingsplikt= # optional property: true (default) or false
+
 server.port=9094
-difi.move.org.number=
 
-difi.move.org.keystore.alias=
-difi.move.org.keystore.password=
+## ORGANIZATION
+#difi.move.org.number= # required
+### KEYSTORE
+#difi.move.org.keystore.alias= # required
+#difi.move.org.keystore.password= # required
+#difi.move.org.keystore.path= # required
 difi.move.org.keystore.path=file:///integrasjonspunkt/auth.jks
+
+## ALTINN: Correspondance agency
+#difi.move.dpo.username= # required
+#difi.move.dpo.password= # required
+#difi.move.dpo.streamingserviceUrl=
+#difi.move.dpo.brokerserviceUrl=
+
+## ALTINN Post til virksomheter: Correspondance agency
+#difi.move.dpv.externalServiceCode= # required
+#difi.move.dpv.externalServiceEditionCode= # required
+#difi.move.dpv.username= # required
+#difi.move.dpv.password= # required
+#difi.move.dpv.sms.varslingstekst=Melding mottatt i innboks
+#difi.move.dpv.email.emne=Emne: melding mottatt i innboks
+#difi.move.dpv.email.varslingstekst=Tekst: melding mottatt i innboks
+
+## Digital post innbygger
+#difi.move.dpi.endpoint= # required
+#difi.move.dpi.keystore.alias= # required
+#difi.move.dpi.keystore.path= # required
+#difi.move.dpi.keystore.password= # required
+#difi.move.dpi.mpcId=
+#difi.move.dpi.securityLevel= # 3 (default) or 4
+
+# FIKS
+## FIKS settings
+# difi.move.fiks.inn.baseUrl=https://test.svarut.ks.no/tjenester/svarinn
+
+#For FIKS SvarInn (mottaker)
+difi.move.fiks.inn.username= # username for receiving messages
+difi.move.fiks.inn.password= # password for receiving messages
+
+#For FIKS SvarUt (avsender)
+difi.move.fiks.ut.username= # username for sending messages
+difi.move.fiks.ut.password= # password for sending messages
+
+## Message Service Handler
+#difi.move.msh.endpointURL=
+
+## NOARK settings
+#difi.move.noarkSystem.type= # required
+#difi.move.noarkSystem.endpointURL= # required
+#difi.move.noarkSystem.username=
+#difi.move.noarkSystem.password=
+#difi.move.noarkSystem.domain=
+
+## Feature toggles
+#difi.move.feature.enableQueue=
+#difi.move.feature.returnOkOnEmptyPayload=
