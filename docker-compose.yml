@@ -1,0 +1,16 @@
+version: "3.6"
+
+services:
+  integrasjonspunkt:
+    image: dibkdocker.azurecr.io/difi/integrasjonspunkt
+    ports:
+      - "9094:9094"
+    deploy:
+      mode: replicated
+      replicas: 1
+      endpoint_mode: dnsrr
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
