@@ -4,7 +4,7 @@ MAINTAINER Eirik Wulff <ew@dibk.no>
 ARG ver="1.7.93"
 
 ENV TERM=xterm TZ=Europe/Oslo DEBIAN_FRONTEND=noninteractive
-ENV VERSION=$version
+ENV VERSION=$ver
 
 # Timezone and locale
 RUN apt-get update && apt-get install -yq --no-install-recommends locales curl nano && \
