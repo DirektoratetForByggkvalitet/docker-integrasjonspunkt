@@ -2,6 +2,7 @@ FROM java:8-jdk
 MAINTAINER Eirik Wulff <ew@dibk.no>
 
 ARG ver="1.7.93"
+ARG certFile
 
 ENV TERM=xterm TZ=Europe/Oslo DEBIAN_FRONTEND=noninteractive
 ENV VERSION=$ver
@@ -26,7 +27,7 @@ RUN apt-get -q -y clean && \
 	rm -rf /usr/share/man/?? /usr/share/man/??_*
 
 # Install the Keystore and properties file (not in Git)
-COPY auth.jks /integrasjonspunkt/
+COPY $certFile /integrasjonspunkt/auth.jks
 COPY integrasjonspunkt-local.properties /integrasjonspunkt/
 
 EXPOSE 9094
