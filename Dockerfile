@@ -1,10 +1,10 @@
 FROM java:8-jdk
 MAINTAINER Eirik Wulff <ew@dibk.no>
 
-ENV TERM=xterm TZ=Europe/Oslo DEBIAN_FRONTEND=noninteractive
-ENV VERSION="1.7.89"
-ENV DLURL="https://beta-meldingsutveksling.difi.no/service/local/repositories/releases/content/no/difi/meldingsutveksling/integrasjonspunkt/$VERSION/integrasjonspunkt-$VERSION.jar"
+ARG ver="1.7.93"
 
+ENV TERM=xterm TZ=Europe/Oslo DEBIAN_FRONTEND=noninteractive
+ENV VERSION=$version
 
 # Timezone and locale
 RUN apt-get update && apt-get install -yq --no-install-recommends locales curl nano && \
@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends locales curl n
 
 # Download the jar from Difi
 RUN mkdir -p /integrasjonspunkt && cd /integrasjonspunkt && \
-	curl -Lo integrasjonspunkt.jar $DLURL
+	curl -Lo integrasjonspunkt.jar "https://beta-meldingsutveksling.difi.no/service/local/repositories/releases/content/no/difi/meldingsutveksling/integrasjonspunkt/$VERSION/integrasjonspunkt-$VERSION.jar"
 
 # Cleanup
 RUN apt-get -q -y clean && \
@@ -32,13 +32,14 @@ COPY integrasjonspunkt-local.properties /integrasjonspunkt/
 EXPOSE 9094
 
 WORKDIR /integrasjonspunkt
-CMD ["java", "-jar", "integrasjonspunkt.jar", "--app.logger.enableSSL=false" ]
+CMD ["java", "-Xmx1024m", "-jar", "integrasjonspunkt.jar", "--app.logger.enableSSL=false" ]
 
 
-LABEL version="1.0"
+LABEL version="1.1"
 
 LABEL vendor="Direktoratet for byggkvalitet / Norwegian Building Authority" \
 	description="Installs integrasjonspunkt from Difi, in the setting of DiBK" \
 	src="https://bitbucket.org/dibk/difi-integrasjonspunkt" \
-	author="Eirik Wulff <ew@dibk.no>" \
-	image.tag="dibkdocker.azurecr.io/difi/integrasjonspunkt"
+	author="Eirik Wulff <ew@dibk.no>"
+
+LABEL image.tag="dibkdocker.azurecr.io/difi/integrasjonspunkt:latest"
