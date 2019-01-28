@@ -1,18 +1,42 @@
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
-    io.kompose.service: integrasjonspunkt
+    app: integrasjonspunkt
   name: integrasjonspunkt
 spec:
-  containers:
-  - image: dibkdocker.azurecr.io/difi/integrasjonspunkt:staging
-    name: integrasjonspunkt
-    ports:
-    - containerPort: 9094
-    resources: {}
-  imagePullSecrets:
-  - name: azureregistry
-  restartPolicy: OnFailure
-status: {}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: integrasjonspunkt
+  template:
+    metadata:
+      labels:
+        app: integrasjonspunkt
+    spec:
+      containers:
+      - image: dibkdocker.azurecr.io/difi/integrasjonspunkt:1.7.94
+        imagePullPolicy: Always
+        name: integrasjonspunkt
+        ports:
+        - name: http
+          containerPort: 9094
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /noarkExchange?wsdl
+            port: http
+          initialDelaySeconds: 250
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 25
+        livenessProbe:
+          httpGet:
+            path: /noarkExchange?wsdl
+            port: http
+          initialDelaySeconds: 400
+          periodSeconds: 20
+          successThreshold: 1
+          failureThreshold: 5
+      imagePullSecrets:
+      - name: azureregistry
