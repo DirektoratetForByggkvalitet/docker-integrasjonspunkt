@@ -15,12 +15,12 @@ ADD docker/motd /etc/motd
 ARG PORT=9093
 ENV PORT=${PORT} SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties /opt/integrasjonspunkt/integrasjonspunkt-local.properties
-RUN chown -R java:java /opt/integrasjonspunkt
+RUN mkdir -p /opt/integrasjonspunkt/activemq-data /opt/integrasjonspunkt/messages /opt/integrasjonspunkt/uploads && \
+    chown -R java:java /opt/integrasjonspunkt
 
 
 # Opprydding
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /opt/integrasjonspunkt/activemq-data /opt/integrasjonspunkt/messages /opt/integrasjonspunkt/uploads
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 EXPOSE 2222 9093
 HEALTHCHECK --interval=5m --timeout=3s \
     CMD curl -f http://localhost:9093/manage/health || exit 1
