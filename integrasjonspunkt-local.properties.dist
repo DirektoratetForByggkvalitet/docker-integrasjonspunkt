@@ -1,9 +1,6 @@
 #Fyll inn lokale vedier der de mangler
 #navnet skal være: integrasjonspunkt-local.properties
 
-# Aktivt miljø production|staging
-spring.profiles.active=${APP_ENV}
-
 #eInnsyn
 server.port=${SERVER_PORT}
 difi.move.org.number=${ORG_NUMBER}
@@ -21,6 +18,11 @@ difi.move.feature.enableDPE=${DPE_ENABLE}
 difi.move.feature.enableDPV=${DPV_ENABLE}
 difi.move.dpv.username=${DPV_USERNAME}
 difi.move.dpv.password=${DPV_PASSWORD}
+
+# Autentisering (HTTP Basic Auth)
+difi.security.enable=${BA_ENABLE}
+difi.security.user.name=${BA_USERNAME}
+dif.security.user.password=${BA_PASSWORD}
 
 ## FIKS - SvarUt/SvarInn (Settes kun ved bruk av SvarUt/SvarInn)
 ##----------------------
@@ -42,5 +44,3 @@ difi.move.dpv.password=${DPV_PASSWORD}
 #difi.move.fiks.inn.mailOnError=false
 #difi.move.mail.enableAuth=false
 #difi.move.mail.trust=${difi.move.mail.smtpHost}
-
-management.endpoint.health.show-details=always
