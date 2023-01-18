@@ -1,6 +1,0 @@
-FROM dibkdocker.azurecr.io/difi/integrasjonspunkt:latest
-MAINTAINER Eirik Wulff <ew@dibk.no>
-
-CMD ["java", "-Xmx1024m", "-Dspring.profiles.active=staging", "-jar", "integrasjonspunkt.jar", "--app.logger.enableSSL=false" ]
-
-LABEL image.tag="dibkdocker.azurecr.io/difi/integrasjonspunkt:staging"

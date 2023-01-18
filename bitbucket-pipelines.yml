@@ -1,0 +1,24 @@
+image: atlassian/default-image:3 # Uses Atlassian's default image as default
+
+definitions:
+  scripts:
+    - script: &registryLogin
+        echo ${AZURE_SP_SECRET} | docker login --username ${AZURE_SP_ID} --password-stdin ${DOCKER_REGISTRY}
+
+pipelines:
+  default:
+    - step: 
+        name: 'Bygger docker-image for DiBK sitt integrasjonspunkt'
+        runs-on:
+          - "self.hosted"
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
+          - *registryLogin
+          - IMAGE_NAME=${DOCKER_REGISTRY}/app/integrasjonspunkt
+          - docker build -t ${IMAGE_NAME} -f Dockerfile
+          - docker push ${IMAGE_NAME}
+

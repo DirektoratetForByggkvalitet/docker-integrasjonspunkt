@@ -1,2 +1,3 @@
 *.jks
 *.properties
+/persisted

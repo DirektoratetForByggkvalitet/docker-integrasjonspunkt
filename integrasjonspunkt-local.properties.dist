@@ -1,66 +1,46 @@
-# Sample of all possible properties.
-# Follows spring externalized properties, with relaxed bindings:
-# https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-relaxed-binding
+#Fyll inn lokale vedier der de mangler
+#navnet skal være: integrasjonspunkt-local.properties
 
-# Integrasjonspunkt properties
-#difi.move.serviceregistryEndpoint=
-#difi.move.varslingsplikt= # optional property: true (default) or false
+# Aktivt miljø production|staging
+spring.profiles.active=${APP_ENV}
 
-server.port=9094
+#eInnsyn
+server.port=${SERVER_PORT}
+difi.move.org.number=${ORG_NUMBER}
 
-## ORGANIZATION
-#difi.move.org.number= # required
-### KEYSTORE
-#difi.move.org.keystore.alias= # required
-#difi.move.org.keystore.password= # required
-#difi.move.org.keystore.path= # required
-difi.move.org.keystore.path=file:///integrasjonspunkt/auth.jks
+# Virksomhetssertifikat 2021
+difi.move.org.keystore.alias=${KEYSTORE_ALIAS}
+difi.move.org.keystore.password=${KEYSTORE_PASS}
+difi.move.org.keystore.path=${KEYSTORE_PATH}
+difi.move.org.keystore.type=${KEYSTORE_TYPE}
 
-## ALTINN: Correspondance agency
-#difi.move.dpo.username= # required
-#difi.move.dpo.password= # required
-#difi.move.dpo.streamingserviceUrl=
-#difi.move.dpo.brokerserviceUrl=
+difi.move.feature.enableDPE=${DPE_ENABLE}
 
-## ALTINN Post til virksomheter: Correspondance agency
-#difi.move.dpv.externalServiceCode= # required
-#difi.move.dpv.externalServiceEditionCode= # required
-#difi.move.dpv.username= # required
-#difi.move.dpv.password= # required
-#difi.move.dpv.sms.varslingstekst=Melding mottatt i innboks
-#difi.move.dpv.email.emne=Emne: melding mottatt i innboks
-#difi.move.dpv.email.varslingstekst=Tekst: melding mottatt i innboks
+## Digital post private virksomheter (Settes kun dersom man bruker DPV via integrasjonspunktet. Fjern utkommentering (#))
+##----------------------------------
+difi.move.feature.enableDPV=${DPV_ENABLE}
+difi.move.dpv.username=${DPV_USERNAME}
+difi.move.dpv.password=${DPV_PASS}
 
-## Digital post innbygger
-#difi.move.dpi.endpoint= # required
-#difi.move.dpi.keystore.alias= # required
-#difi.move.dpi.keystore.path= # required
-#difi.move.dpi.keystore.password= # required
-#difi.move.dpi.mpcId=
-#difi.move.dpi.securityLevel= # 3 (default) or 4
+## FIKS - SvarUt/SvarInn (Settes kun ved bruk av SvarUt/SvarInn)
+##----------------------
+#difi.move.feature.enableDPF=true
 
-# FIKS
-## FIKS settings
-# difi.move.fiks.inn.baseUrl=https://test.svarut.ks.no/tjenester/svarinn
+## SvarInn (mottaker)
+#difi.move.fiks.inn.username=
+#difi.move.fiks.inn.password=
 
-#For FIKS SvarInn (mottaker)
-difi.move.fiks.inn.username= # username for receiving messages
-difi.move.fiks.inn.password= # password for receiving messages
+## SvarUt (avsender)
+#difi.move.fiks.ut.username=
+#difi.move.fiks.ut.password=
 
-#For FIKS SvarUt (avsender)
-difi.move.fiks.ut.username= # username for sending messages
-difi.move.fiks.ut.password= # password for sending messages
+## innstillinger for fiks mailsending
+#difi.move.mail.smtpHost=
+#difi.move.mail.smtpPort=
+#difi.move.mail.receiverAddress=
+#difi.move.mail.senderAddress=
+#difi.move.fiks.inn.mailOnError=false
+#difi.move.mail.enableAuth=false
+#difi.move.mail.trust=${difi.move.mail.smtpHost}
 
-## Message Service Handler
-#difi.move.msh.endpointURL=
-
-## NOARK settings
-#difi.move.noarkSystem.type= # required
-#difi.move.noarkSystem.endpointURL= # required
-#difi.move.noarkSystem.username=
-#difi.move.noarkSystem.password=
-#difi.move.noarkSystem.domain=
-
-## Feature toggles
-#difi.move.feature.enableQueue=
-#difi.move.feature.returnOkOnEmptyPayload=
+management.endpoint.health.show-details=always
