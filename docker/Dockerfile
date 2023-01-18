@@ -15,6 +15,7 @@ ADD docker/motd /etc/motd
 ARG PORT=9093
 ENV PORT=${PORT} SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties /opt/integrasjonspunkt/integrasjonspunkt-local.properties
+RUN chown -R java:java /opt/integrasjonspunkt
 
 
 # Opprydding
