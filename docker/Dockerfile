@@ -18,8 +18,10 @@ ADD integrasjonspunkt-local.properties /opt/integrasjonspunkt/integrasjonspunkt-
 
 
 # Opprydding
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /opt/integrasjonspunkt/activemq-data /opt/integrasjonspunkt/messages /opt/integrasjonspunkt/uploads
 EXPOSE 2222 80
 HEALTHCHECK --interval=5m --timeout=3s \
     CMD curl -f http://localhost:${PORT}/manage/health || exit 1
+
 ENTRYPOINT ["/init"]
