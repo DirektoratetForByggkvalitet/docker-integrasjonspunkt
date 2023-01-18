@@ -17,6 +17,7 @@ pipelines:
           - docker
         script:
           - envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
+          - cat integrasjonspunkt-local.properties
           - *registryLogin
           - IMAGE_NAME=${DOCKER_REGISTRY}/app/integrasjonspunkt
           - docker build . -t ${IMAGE_NAME} -f docker/Dockerfile
