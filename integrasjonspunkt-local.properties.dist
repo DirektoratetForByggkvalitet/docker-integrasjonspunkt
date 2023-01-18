@@ -20,7 +20,7 @@ difi.move.feature.enableDPE=${DPE_ENABLE}
 ##----------------------------------
 difi.move.feature.enableDPV=${DPV_ENABLE}
 difi.move.dpv.username=${DPV_USERNAME}
-difi.move.dpv.password=${DPV_PASS}
+difi.move.dpv.password=${DPV_PASSWORD}
 
 ## FIKS - SvarUt/SvarInn (Settes kun ved bruk av SvarUt/SvarInn)
 ##----------------------

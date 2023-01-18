@@ -11,11 +11,12 @@ ADD docker/sshd_config /etc/ssh/sshd_config
 RUN echo "root:Docker!" | chpasswd 
 ADD docker/services.d /etc/services.d
 
-ENV PORT=80 SSH_PORT=2222 TZ="Europe/Oslo"
+ARG PORT=80
+ENV PORT=${PORT} SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties /opt/integrasjonspunkt
 
 # Opprydding
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 EXPOSE 2222 80
-
+HEALTHCHECK &{["CMD-SHELL" "curl -s --fail http://localhost:${PORT}/manage/health > /dev/null || exit 1"] "0s" "0s" "0s" '\x00'}
 ENTRYPOINT ["/init"]
