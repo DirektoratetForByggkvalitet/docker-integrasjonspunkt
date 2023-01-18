@@ -13,7 +13,7 @@ ADD docker/services.d /etc/services.d
 
 ARG PORT=80
 ENV PORT=${PORT} SSH_PORT=2222 TZ="Europe/Oslo"
-ADD integrasjonspunkt-local.properties /opt/integrasjonspunkt
+ADD integrasjonspunkt-local.properties /opt/integrasjonspunkt/integrasjonspunkt-local.properties
 
 # Opprydding
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
