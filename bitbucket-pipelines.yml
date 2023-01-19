@@ -13,8 +13,6 @@ pipelines:
           - "self.hosted"
         services:
           - docker
-        caches:
-          - docker
         script:
           - envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
           - echo "Laster ned Virksomhetssertifikat offentlig nøkkel"
@@ -25,8 +23,7 @@ pipelines:
               AZURE_TENANT_ID: $AZURE_TENANT_ID
               CLI_COMMAND: az keyvault secret download --encoding base64 --file dibk-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
           - empty=
-          - openssl pkcs12 -in dibk-auth.p12 -passin pass:$empty -clcerts -nokeys -out auth.pksc12 -name ${KEYSTORE_ALIAS} -passout pass:${KEYSTORE_PASS} -noiter -nomaciter
-
+          - openssl pkcs12 -in dibk-auth.p12 -passin pass:$empty -clcerts -nokeys -out auth.pkcs12 -name ${KEYSTORE_ALIAS} -passout pass:${KEYSTORE_PASS} -noiter -nomaciter
           - *registryLogin
           - IMAGE_NAME=${DOCKER_REGISTRY}/app/integrasjonspunkt
           - docker build . -t ${IMAGE_NAME} -f docker/Dockerfile
