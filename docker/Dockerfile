@@ -5,7 +5,7 @@ LABEL no.dibk.author "Eirik Wulff <ew@dibk.no>"
 ENV TERM=xterm DEBIAN_FRONTEND=noninteractive
 ENV APP_ENV=${profile}
 
-RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates curl openssl
+RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates curl openssl xz
 
 # Installerer s6-overlay
 ARG S6_OVERLAY_VERSION=3.1.3.0
