@@ -30,7 +30,7 @@ ENV APP_DIR=${APP_DIR} CERTHOST=tt02.altinn.no CERTPORT=443 CAKEYSTOREFILE=${JAV
 RUN mkdir -p ${APP_DIR} && \
     openssl s_client -connect ${CERTHOST}:${CERTPORT} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${HOST}.cert && \
     keytool -import -noprompt -trustcacerts -alias ${CERTHOST} -file ${CERTHOST}.cert \
-        -keystorefile ${CAKEYSTOREFILE} -storepass ${CAKEYSTOREPASS} && \
+        -keystore ${CAKEYSTOREFILE} -storepass ${CAKEYSTOREPASS} && \
     groupadd -o -g 1000 java && useradd -o -r -m -u 1000 -g 1000 java
 
 COPY --from=digdir/integrasjonspunkt:latest /opt/integrasjonspunkt/app.jar /opt/integrasjonspunkt/app.jar
