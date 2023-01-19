@@ -14,8 +14,19 @@ ADD docker/motd /etc/motd
 
 ENV PORT=9093 SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties /opt/integrasjonspunkt/integrasjonspunkt-local.properties
-ADD auth.pkcs12 /opt/integrasjonspunkt/auth.pkcs12
-RUN chown -R java:java /opt/integrasjonspunkt
+ARG KEYSTORE_PASS
+ARG KEYSTORE_ALIAS=dibk
+ADD auth.p12 /opt/integrasjonspunkt/auth.p12
+# Konverterer sertifikatet til JKS
+RUN keytool -importkeystore \
+        -srckeystore /opt/integrasjonspunkt/auth.p12 \
+        -srcstorepass ${KEYSTORE_PASS} \
+        -srcstoretype pkcs12 \
+        -deststoretype jks \
+        -destkeystore /opt/integrasjonspunkt/auth.jks \
+        -deststorepass ${KEYSTORE_PASS} \
+        -destalias ${KEYSTORE_ALIAS}  && \
+    chown -R java:java /opt/integrasjonspunkt
 
 # Opprydding
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -25,5 +36,6 @@ HEALTHCHECK --interval=5m --timeout=3s \
 
 ARG profile=staging
 ENV APP_ENV=${profile}
+WORKDIR /opt/integrasjonspunkt
 
 ENTRYPOINT ["/init"]

@@ -23,11 +23,11 @@ pipelines:
               AZURE_TENANT_ID: $AZURE_TENANT_ID
               CLI_COMMAND: az keyvault secret download --encoding base64 --file dibk-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
           - empty=
-          - echo "Eksporterer til pkcs12 keystore"
+          - echo "Oppretter passord på sertifikatet"
           - openssl pkcs12 -in dibk-auth.p12 -passin pass:$empty -nodes -out dibk-auth.pem
-          - openssl pkcs12 -export -in dibk-auth.pem -out auth.pkcs12 -passout pass:${KEYSTORE_PASS} -name dibk -noiter -nomaciter
+          - openssl pkcs12 -export -in dibk-auth.pem -out auth.p12 -passout pass:${KEYSTORE_PASS}
           - *registryLogin
           - IMAGE_NAME=${DOCKER_REGISTRY}/app/integrasjonspunkt
-          - docker build . -t ${IMAGE_NAME} --build-arg profile=${APP_ENV} -f docker/Dockerfile
+          - docker build . -t ${IMAGE_NAME} --build-arg profile=${APP_ENV} --build-arg KEYSTORE_PASS=${KEYSTORE_PASS} --build-arg KEYSTORE_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
           - docker push ${IMAGE_NAME}
 
