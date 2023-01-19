@@ -23,4 +23,7 @@ EXPOSE 2222 9093
 HEALTHCHECK --interval=5m --timeout=3s \
     CMD curl -f http://localhost:9093/manage/health || exit 1
 
+ARG profile=staging
+ENV APP_ENV=${profile}
+
 ENTRYPOINT ["/init"]

@@ -1,7 +1,6 @@
 #Fyll inn lokale vedier der de mangler
 #navnet skal være: integrasjonspunkt-local.properties
 
-#eInnsyn
 server.port=${SERVER_PORT}
 difi.move.org.number=${ORG_NUMBER}
 
@@ -11,6 +10,7 @@ difi.move.org.keystore.password=${KEYSTORE_PASS}
 difi.move.org.keystore.path=${KEYSTORE_PATH}
 difi.move.org.keystore.type=${KEYSTORE_TYPE}
 
+#eInnsyn
 difi.move.feature.enableDPE=${DPE_ENABLE}
 
 ## Digital post private virksomheter (Settes kun dersom man bruker DPV via integrasjonspunktet. Fjern utkommentering (#))
@@ -24,10 +24,14 @@ difi.security.enable=${BA_ENABLE}
 difi.security.user.name=${BA_USERNAME}
 dif.security.user.password=${BA_PASSWORD}
 
+# Database-oppsett
 difi.datasource.url=${DB_URL}
 difi.datasource.username=${DB_USERNAME}
 difi.datasource.password=${DB_PASSWORD}
 difi.move.nextmove.useDbPersistence=true
+
+# Meldingskø
+difi.activemq.broker-url=vm://localhost
 
 ## FIKS - SvarUt/SvarInn (Settes kun ved bruk av SvarUt/SvarInn)
 ##----------------------
