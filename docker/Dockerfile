@@ -33,7 +33,8 @@ RUN mkdir -p ${APP_DIR} && \
         -keystore ${CAKEYSTOREFILE} -storepass ${CAKEYSTOREPASS} && \
     groupadd -o -g 1000 java && useradd -o -r -m -u 1000 -g 1000 java
 
-COPY --from=digdir/integrasjonspunkt:latest /opt/integrasjonspunkt/app.jar /opt/integrasjonspunkt/app.jar
+ARG APP_VERSION="latest"
+ADD https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar /opt/integrasjonspunkt/app.jar
 
 ENV PORT=9093 SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.properties

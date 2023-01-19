@@ -28,8 +28,11 @@ pipelines:
           - echo "Oppretter passord på sertifikatet"
           - openssl pkcs12 -in dibk-auth.p12 -passin pass:$empty -nodes -out dibk-auth.pem
           - openssl pkcs12 -export -in dibk-auth.pem -out auth.p12 -passout pass:${KEYSTORE_PASS} -name ${KEYSTORE_ALIAS}
+          - echo "Finner versjonsnr på integrasjonspunktet"
+          - curl -LO https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt/maven-metadata.xml
+          - APP_VER=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
           - *registryLogin
           - IMAGE_NAME=${DOCKER_REGISTRY}/app/integrasjonspunkt
-          - docker build . --pull -t ${IMAGE_NAME} --build-arg profile=${APP_ENV} --build-arg KS_PASS=${KEYSTORE_PASS} --build-arg KS_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
+          - docker build . --pull -t ${IMAGE_NAME} --build-arg APP_VERSION=${APP_VER} --build-arg profile=${APP_ENV} --build-arg KS_PASS=${KEYSTORE_PASS} --build-arg KS_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
           - docker push ${IMAGE_NAME}
 
