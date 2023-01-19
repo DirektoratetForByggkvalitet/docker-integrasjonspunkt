@@ -1,18 +1,12 @@
 # LES MEG
 
-This is a docker image built to facilitate "Difi integrasjonspunkt" inside Docker. It is based on java:8-jdk.
+Docker-image som kjører DiBK sitt integrasjonspunkt mot Digdir i Azure. 
 
-Generally, it leans on the files auth.jks and integrasjonspunkt-local.properties, which enables authorisation and setup for use. Both these are installed in /integrasjonspunkt upon build, along with the integrasjonspunkt.jar application file. We have provided a sample properties file for convinience.
+Integrasjonspunktet kjører med støtte fra MySQL-database, og lagrer dermed ingenting lokalt.
 
-The image exposes port 9093, and will log all activity to the docker log.
-
+Konfigurasjonsfilen befolkes fra Bitbucket Pipelines ved bygging. Samtidig hentes også virksomhetssertifikatet fra Azure Key Vault, og public key lagres til en pkcs12-fil.
 ## Innstillinger for App Service
 
-WEBSITES_PORT settes til 9093
-WEBSITES_CONTAINER_START_TIME_LIMIT økes til 1800 (standard er 230 sekunder)
-
-### Path mappings
-/etc/keystore => Azure Blob som inneholder auth.jks
-/opt/integrasjonspunkt/activemq-data => Azure File Share
-/opt/integrasjonspunkt/messages => Azure File Share
-/opt/integrasjonspunkt/uploads => Azure File Share
+- WEBSITES_PORT må settes til 9093
+- WEBSITES_CONTAINER_START_TIME_LIMIT bør settes til max, 1800 (standard er 230 sekunder). Dette for at containeren skal ha tid til å starte opp
+- Health Check kan settes opp med URL /manage/health

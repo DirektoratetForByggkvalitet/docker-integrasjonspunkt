@@ -12,12 +12,10 @@ RUN echo "root:Docker!" | chpasswd
 ADD docker/services.d /etc/services.d
 ADD docker/motd /etc/motd
 
-ARG PORT=9093
-ENV PORT=${PORT} SSH_PORT=2222 TZ="Europe/Oslo"
+ENV PORT=9093 SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties /opt/integrasjonspunkt/integrasjonspunkt-local.properties
-RUN mkdir -p /opt/integrasjonspunkt/activemq-data /opt/keystore /opt/database && \
-    chown -R java:java /opt/integrasjonspunkt /opt/keystore /opt/database
-
+ADD auth.pkcs12 /opt/integrasjonspunkt/auth.pkcs12
+RUN chown -R java:java /opt/integrasjonspunkt
 
 # Opprydding
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
