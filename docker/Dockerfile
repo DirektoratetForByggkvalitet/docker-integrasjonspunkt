@@ -22,6 +22,7 @@ RUN keytool -importkeystore \
         -srckeystore /opt/integrasjonspunkt/auth.p12 \
         -srcstorepass ${KEYSTORE_PASS} \
         -srcstoretype pkcs12 \
+        -srcalias ${KEYSTORE_ALIAS} \
         -deststoretype jks \
         -destkeystore /opt/integrasjonspunkt/auth.jks \
         -deststorepass ${KEYSTORE_PASS} \
