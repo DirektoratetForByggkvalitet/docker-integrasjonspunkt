@@ -13,6 +13,8 @@ pipelines:
           - "self.hosted"
         services:
           - docker
+        caches:
+          - docker
         script:
           - envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
           - echo "Laster ned Virksomhetssertifikat"
@@ -28,6 +30,6 @@ pipelines:
           - openssl pkcs12 -export -in dibk-auth.pem -out auth.p12 -passout pass:${KEYSTORE_PASS} -name ${KEYSTORE_ALIAS}
           - *registryLogin
           - IMAGE_NAME=${DOCKER_REGISTRY}/app/integrasjonspunkt
-          - docker build . -t ${IMAGE_NAME} --build-arg profile=${APP_ENV} --build-arg KEYSTORE_PASS=${KEYSTORE_PASS} --build-arg KEYSTORE_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
+          - docker build . --pull -t ${IMAGE_NAME} --build-arg profile=${APP_ENV} --build-arg KEYSTORE_PASS=${KEYSTORE_PASS} --build-arg KEYSTORE_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
           - docker push ${IMAGE_NAME}
 
