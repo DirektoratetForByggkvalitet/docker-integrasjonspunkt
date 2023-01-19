@@ -24,6 +24,11 @@ difi.security.enable=${BA_ENABLE}
 difi.security.user.name=${BA_USERNAME}
 dif.security.user.password=${BA_PASSWORD}
 
+difi.datasource.url=${DB_URL}
+difi.datasource.username=${DB_USERNAME}
+difi.datasource.password=${DB_PASSWORD}
+difi.move.nextmove.useDbPersistence=true
+
 ## FIKS - SvarUt/SvarInn (Settes kun ved bruk av SvarUt/SvarInn)
 ##----------------------
 #difi.move.feature.enableDPF=true
