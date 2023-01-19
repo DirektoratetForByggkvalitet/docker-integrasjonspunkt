@@ -3,13 +3,10 @@ LABEL no.dibk.description "Docker-image for Digdir integrasjonspunkt, basert på
 LABEL no.dibk.author "Eirik Wulff <ew@dibk.no>"
 
 ENV TERM=xterm DEBIAN_FRONTEND=noninteractive
-ARG APP_DIR=/opt/integrasjonspunkt
-ARG profile=staging
 ENV APP_ENV=${profile}
 
 COPY --from=arpaulnet/s6-overlay-stage:2.0 / /
-ENTRYPOINT ["/init"]
-COPY --from=digdir/integrasjonspunkt:latest /opt/integrasjonspunkt/app.jar ${APP_DIR}/app.jar
+
 
 RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates curl openssl
 ADD docker/sshd_config /etc/ssh/sshd_config
@@ -18,11 +15,19 @@ RUN update-ca-certificates && \
 ADD docker/services.d /etc/services.d
 ADD docker/motd /etc/motd
 
-ENV APP_DIR=/opt/integrasjonspunkt CERTHOST=tt02.altinn.no CERTPORT=443 CAKEYSTOREFILE=${JAVA_HOME}/lib/security/cacerts CAKEYSTOREPASS=changeit
-RUN openssl s_client -connect ${CERTHOST}:${CERTPORT} </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${HOST}.cert && \
+ENTRYPOINT ["/init"]
+
+# Oppsett for cacerts + oppretting av brukeren java
+ARG APP_DIR=/opt/integrasjonspunkt
+ARG profile=staging
+ENV APP_DIR=${APP_DIR} CERTHOST=tt02.altinn.no CERTPORT=443 CAKEYSTOREFILE=${JAVA_HOME}/lib/security/cacerts CAKEYSTOREPASS=changeit
+RUN mkdir -p ${APP_DIR} && \
+    openssl s_client -connect ${CERTHOST}:${CERTPORT} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${HOST}.cert && \
     keytool -import -noprompt -trustcacerts -alias ${HOST} -file ${HOST}.cert \
         -keystorefile ${CAKEYSTOREFILE} -storepass ${CAKEYSTOREPASS} && \
     groupadd -o -g 1000 java && useradd -o -r -m -u 1000 -g 1000 java
+
+COPY --from=digdir/integrasjonspunkt:latest /opt/integrasjonspunkt/app.jar /opt/integrasjonspunkt/app.jar
 
 ENV PORT=9093 SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.properties
