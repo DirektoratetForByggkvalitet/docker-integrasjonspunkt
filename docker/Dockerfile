@@ -7,15 +7,13 @@ ENV APP_ENV=${profile}
 
 COPY --from=arpaulnet/s6-overlay-stage:2.0 / /
 
-
 RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates curl openssl
+# Oppsett for openssh-server
 ADD docker/sshd_config /etc/ssh/sshd_config
 RUN update-ca-certificates && \
     echo "root:Docker!" | chpasswd
 ADD docker/services.d /etc/services.d
 ADD docker/motd /etc/motd
-
-ENTRYPOINT ["/init"]
 
 # Oppsett for cacerts + oppretting av brukeren java
 ARG APP_DIR=/opt/integrasjonspunkt
@@ -50,6 +48,6 @@ RUN keytool -importkeystore \
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 EXPOSE 2222 9093
 # HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:9093/manage/health || exit 1
-
+ENTRYPOINT ["/init"]
 WORKDIR ${APP_DIR}
 LABEL version "0.6"
