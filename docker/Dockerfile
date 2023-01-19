@@ -5,9 +5,17 @@ LABEL no.dibk.author "Eirik Wulff <ew@dibk.no>"
 ENV TERM=xterm DEBIAN_FRONTEND=noninteractive
 ENV APP_ENV=${profile}
 
-COPY --from=arpaulnet/s6-overlay-stage:2.0 / /
-
 RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates curl openssl
+
+# Installerer s6-overlay
+ARG S6_OVERLAY_VERSION=3.1.3.0
+RUN ARCH=$(dpkg --print-architecture) && \ 
+    curl -Lo /tmp/s6-overlay-noarch.tar.xz  https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz && \
+    tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
+    curl -Lo /tmp/s6-overlay-${ARCH}.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${ARCH}.tar.xz && \
+    tar -C / -Jxpf /tmp/s6-overlay-${ARCH}.tar.xz
+ENTRYPOINT ["/init"]
+
 # Oppsett for openssh-server
 ADD docker/sshd_config /etc/ssh/sshd_config
 RUN update-ca-certificates && \
@@ -48,6 +56,5 @@ RUN keytool -importkeystore \
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 EXPOSE 2222 9093
 # HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:9093/manage/health || exit 1
-ENTRYPOINT ["/init"]
 WORKDIR ${APP_DIR}
 LABEL version "0.6"
