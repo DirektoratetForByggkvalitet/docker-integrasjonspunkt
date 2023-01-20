@@ -13,6 +13,9 @@ difi.move.org.keystore.type=${KEYSTORE_TYPE}
 #eInnsyn
 difi.move.feature.enableDPE=${DPE_ENABLE}
 
+# Digital post til innbyggere
+difi.move.feature.enableDPI=false
+
 ## Digital post private virksomheter (Settes kun dersom man bruker DPV via integrasjonspunktet. Fjern utkommentering (#))
 ##----------------------------------
 difi.move.feature.enableDPV=${DPV_ENABLE}
@@ -28,6 +31,7 @@ dif.security.user.password=${BA_PASSWORD}
 difi.datasource.url=${DB_URL}
 difi.datasource.username=${DB_USERNAME}
 difi.datasource.password=${DB_PASSWORD}
+# Lagre meldinger i databasen
 difi.move.nextmove.useDbPersistence=true
 
 # Meldingskø
