@@ -15,13 +15,6 @@ RUN ARCH=x86_64 && \
     tar -C / -Jxpf /tmp/s6-overlay-${ARCH}.tar.xz
 ENTRYPOINT ["/init"]
 
-# Oppsett for openssh-server
-ADD docker/sshd_config /etc/ssh/sshd_config
-RUN update-ca-certificates && \
-    echo "root:Docker!" | chpasswd
-ADD docker/services.d /etc/services.d
-ADD docker/motd /etc/motd
-
 # Oppsett for cacerts + oppretting av brukeren java
 ARG APP_DIR=/opt/integrasjonspunkt
 ENV APP_DIR=${APP_DIR} CERTHOST=tt02.altinn.no CERTPORT=443 TRUSTSTOREFILE=${JAVA_HOME}/lib/security/cacerts TRUSTSTOREPASS=changeit
@@ -43,11 +36,24 @@ ARG APP_VERSION="latest"
 ARG MAVEN_REPO=https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt
 ADD ${MAVEN_REPO}/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar /opt/integrasjonspunkt/app.jar
 
+# Oppsett for openssh-server
+ADD docker/sshd_config /etc/ssh/sshd_config
+RUN update-ca-certificates && \
+    echo "root:Docker!" | chpasswd
+ADD docker/services.d /etc/services.d
+ADD docker/motd /etc/motd
+
 ENV PORT=9093 SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.properties
 ARG KS_PASS
 ARG KS_ALIAS=dibk
 ADD auth.p12 ${APP_DIR}/auth.p12
+# Java Cryptography Extension
+ADD docker/JCE/local_policy.jar ${JAVA_HOME}/jre/lib/security/unlimited/local_policy.jar
+ADD docker/JCE/local_policy.jar ${JAVA_HOME}/jre/lib/security/limited/local_policy.jar
+ADD docker/JCE/US_export_policy.jar ${JAVA_HOME}/jre/lib/security/unlimited/US_export_policy.jar
+ADD docker/JCE/US_export_policy.jar ${JAVA_HOME}/jre/lib/security/limited/US_export_policy.jar
+
 # Konverterer sertifikatet til JKS
 # RUN keytool -importkeystore \
 #        -srckeystore ${APP_DIR}/auth.p12 \

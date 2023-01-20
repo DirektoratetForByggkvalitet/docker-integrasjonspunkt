@@ -14,7 +14,7 @@ difi.move.org.keystore.type=${KEYSTORE_TYPE}
 difi.move.feature.enableDPE=${DPE_ENABLE}
 
 # Digital post til innbyggere
-difi.move.feature.enableDPI=false
+difi.move.feature.enableDPI=${DPI_ENABLE}
 
 ## Digital post private virksomheter (Settes kun dersom man bruker DPV via integrasjonspunktet. Fjern utkommentering (#))
 ##----------------------------------
@@ -23,9 +23,9 @@ difi.move.dpv.username=${DPV_USERNAME}
 difi.move.dpv.password=${DPV_PASSWORD}
 
 # Autentisering (HTTP Basic Auth)
-difi.security.enable=${BA_ENABLE}
-difi.security.user.name=${BA_USERNAME}
-dif.security.user.password=${BA_PASSWORD}
+difi.security.enable=${AUTH_ENABLE}
+difi.security.user.name=${AUTH_USERNAME}
+dif.security.user.password=${AUTH_PASSWORD}
 
 # Database-oppsett
 difi.datasource.url=${DB_URL}
