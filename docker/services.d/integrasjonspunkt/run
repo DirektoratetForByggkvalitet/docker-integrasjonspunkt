@@ -1,3 +1,4 @@
 #!/command/with-contenv bash
 
-exec s6-setuidgid java java ${JAVA_OPTS} -jar ${APP_DIR}/app.jar
+cd ${APP_DIR}
+exec s6-setuidgid java java ${JAVA_OPTS} -jar app.jar
