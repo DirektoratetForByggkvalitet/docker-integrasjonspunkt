@@ -1,0 +1,8 @@
+version: '3.9'
+
+services:
+  ip:
+    container_name: ip
+    image: dibknoe.azurecr.io/app/integrasjonspunkt:latest
+    restart: unless-stopped
+    

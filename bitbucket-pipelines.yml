@@ -8,7 +8,7 @@ definitions:
 pipelines:
   default:
     - step: 
-        name: 'Bygger docker-image for DiBK sitt integrasjonspunkt'
+        name: 'Bygger DiBK sitt Digdir-integrasjonspunkt'
         runs-on:
           - "self.hosted"
         services:
