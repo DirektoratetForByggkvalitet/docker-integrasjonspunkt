@@ -3,7 +3,6 @@ LABEL no.dibk.description "Docker-image for Digdir integrasjonspunkt, basert på
 LABEL no.dibk.author "Eirik Wulff <ew@dibk.no>"
 
 ENV TERM=xterm DEBIAN_FRONTEND=noninteractive
-ENV APP_ENV=${profile}
 
 RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates curl openssl xz-utils
 
@@ -25,7 +24,6 @@ ADD docker/motd /etc/motd
 
 # Oppsett for cacerts + oppretting av brukeren java
 ARG APP_DIR=/opt/integrasjonspunkt
-ARG profile=staging
 ENV APP_DIR=${APP_DIR} CERTHOST=tt02.altinn.no CERTPORT=443 CAKEYSTOREFILE=${JAVA_HOME}/lib/security/cacerts CAKEYSTOREPASS=changeit
 RUN mkdir -p ${APP_DIR} && \
     openssl s_client -connect ${CERTHOST}:${CERTPORT} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${CERTHOST}.cert && \
@@ -34,7 +32,8 @@ RUN mkdir -p ${APP_DIR} && \
     groupadd -o -g 1000 java && useradd -o -r -m -u 1000 -g 1000 java
 
 ARG APP_VERSION="latest"
-ADD https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar /opt/integrasjonspunkt/app.jar
+ARG MAVEN_REPO=https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt
+ADD ${MAVEN_REPO}/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar /opt/integrasjonspunkt/app.jar
 
 ENV PORT=9093 SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.properties
@@ -58,4 +57,6 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 EXPOSE 2222 9093
 # HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:9093/manage/health || exit 1
 WORKDIR ${APP_DIR}
-LABEL version "0.6"
+ARG profile=staging
+ENV APP_ENV=${profile}
+LABEL version "0.7"
