@@ -40,5 +40,7 @@ pipelines:
           - *registryLogin
           - IMAGE_NAME=${DOCKER_REGISTRY}/app/integrasjonspunkt
           - docker build . --pull -t ${IMAGE_NAME} --build-arg APP_VERSION=${IP_VER} --build-arg profile=${APP_ENV} --build-arg KS_PASS=${KEYSTORE_PASS} --build-arg KS_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
+          - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${IP_VER}
           - docker push ${IMAGE_NAME}
+          - docker push ${IMAGE_NAME}:${IP_VER}
 
