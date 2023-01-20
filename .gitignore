@@ -1,6 +1,7 @@
 *.jks
 *.properties
 /persisted
+/docker/trustcerts
 *.pem
 *.p12
 *.pkcs12

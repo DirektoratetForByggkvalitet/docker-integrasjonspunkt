@@ -1,4 +1,3 @@
-#!/command/execlineb -P
-with-contenv
-s6-setuidgid java 
-java ${JAVA_OPTS} -Dspring.profiles.active=${APP_ENV} -jar ${APP_DIR}/app.jar
+#!/command/with-contenv bash
+
+exec s6-setuidgid java java ${JAVA_OPTS} -Dspring.profiles.active=${APP_ENV} -jar ${APP_DIR}/app.jar

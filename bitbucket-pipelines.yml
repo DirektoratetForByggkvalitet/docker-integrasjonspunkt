@@ -24,15 +24,21 @@ pipelines:
               AZURE_PASSWORD: $AZURE_SP_SECRET
               AZURE_TENANT_ID: $AZURE_TENANT_ID
               CLI_COMMAND: az keyvault secret download --encoding base64 --file dibk-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
+          - echo "Laster ned CA-sertifikater fra BuyPass og Commfides"
+          - mkdir -p docker/trustcerts
+          - curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/BPClass3RootCA.cer"
+          - curl -Lso docker/trustcerts/CommfidesClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/cpn%20rootca%20sha256%20class%203.crt"
+          - curl -Lso docker/trustcerts/BuyPassClass3TestRootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/test/Buypass_Class_3_Test4_Root_CA.cer"
           - empty=
-          - echo "Oppretter passord på sertifikatet"
+          - echo "Oppretter passord på virksomhetssertifikatet"
           - openssl pkcs12 -in dibk-auth.p12 -passin pass:$empty -nodes -out dibk-auth.pem
           - openssl pkcs12 -export -in dibk-auth.pem -out auth.p12 -passout pass:${KEYSTORE_PASS} -name ${KEYSTORE_ALIAS}
-          - echo "Finner versjonsnr på integrasjonspunktet"
-          - curl -LO https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt/maven-metadata.xml
-          - APP_VER=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
+          - echo "Finner versjonsnummer på siste versjon av integrasjonspunktet"
+          - curl -Lso maven-metadata.xml "https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt/maven-metadata.xml"
+          - IP_VER=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
+          - echo "Bruker versjon $IP_VER"
           - *registryLogin
           - IMAGE_NAME=${DOCKER_REGISTRY}/app/integrasjonspunkt
-          - docker build . --pull -t ${IMAGE_NAME} --build-arg APP_VERSION=${APP_VER} --build-arg profile=${APP_ENV} --build-arg KS_PASS=${KEYSTORE_PASS} --build-arg KS_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
+          - docker build . --pull -t ${IMAGE_NAME} --build-arg APP_VERSION=${IP_VER} --build-arg profile=${APP_ENV} --build-arg KS_PASS=${KEYSTORE_PASS} --build-arg KS_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
           - docker push ${IMAGE_NAME}
 

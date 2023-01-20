@@ -24,12 +24,20 @@ ADD docker/motd /etc/motd
 
 # Oppsett for cacerts + oppretting av brukeren java
 ARG APP_DIR=/opt/integrasjonspunkt
-ENV APP_DIR=${APP_DIR} CERTHOST=tt02.altinn.no CERTPORT=443 CAKEYSTOREFILE=${JAVA_HOME}/lib/security/cacerts CAKEYSTOREPASS=changeit
+ENV APP_DIR=${APP_DIR} CERTHOST=tt02.altinn.no CERTPORT=443 TRUSTSTOREFILE=${JAVA_HOME}/lib/security/cacerts TRUSTSTOREPASS=changeit
+# Legger til CA-sertifikater fra BuyPass og Commfides
+ADD docker/trustcerts /tmp/trustcerts
 RUN mkdir -p ${APP_DIR} && \
     openssl s_client -connect ${CERTHOST}:${CERTPORT} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${CERTHOST}.cert && \
     keytool -import -noprompt -trustcacerts -alias ${CERTHOST} -file ${CERTHOST}.cert \
-        -keystore ${CAKEYSTOREFILE} -storepass ${CAKEYSTOREPASS} && \
-    groupadd -o -g 1000 java && useradd -o -r -m -u 1000 -g 1000 java
+        -keystore ${TRUSTSTOREFILE} -storepass ${TRUSTSTOREPASS} && \
+    groupadd -o -g 1000 java && useradd -o -r -m -u 1000 -g 1000 java && \
+    echo "Importerer CA-sertifikater fra BuyPass og Commfides til cacerts" && \
+    for FILE in /tmp/trustcerts/*; do \
+        keytool -import -noprompt -trustcacerts -alias "${FILE%.*}" -file "${FILE}" \
+        -keystore ${TRUSTSTOREFILE} -storepass ${TRUSTSTOREPASS}; \
+    done && \
+    rm -rf /tmp/trustcerts
 
 ARG APP_VERSION="latest"
 ARG MAVEN_REPO=https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt
@@ -46,7 +54,7 @@ RUN keytool -importkeystore \
         -srcstorepass ${KS_PASS} \
         -srcstoretype pkcs12 \
         -srcalias ${KS_ALIAS} \
-        -deststoretype jks \
+        -deststoretype pkcs12 \
         -destkeystore ${APP_DIR}/auth.jks \
         -deststorepass ${KS_PASS} \
         -destalias ${KS_ALIAS}  && \
