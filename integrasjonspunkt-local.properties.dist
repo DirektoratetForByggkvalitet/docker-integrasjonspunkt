@@ -1,4 +1,8 @@
-difi.move.org.number=${ORG_NR}
+# Port for innkommende kommunikasjon
+server.port=${SERVER_PORT}
+
+# Organisasjonens regnr
+difi.move.org.number="${ORG_NR}"
 
 # Virksomhetssertifikat 2021
 difi.move.org.keystore.alias=${KEYSTORE_ALIAS}
@@ -53,7 +57,3 @@ difi.activemq.broker-url=vm://localhost
 #difi.move.fiks.inn.mailOnError=false
 #difi.move.mail.enableAuth=false
 #difi.move.mail.trust=${difi.move.mail.smtpHost}
-
-# Port for innkommende kommunikasjon
-server.port=${SERVER_PORT}
-
