@@ -49,16 +49,16 @@ ARG KS_PASS
 ARG KS_ALIAS=dibk
 ADD auth.p12 ${APP_DIR}/auth.p12
 # Konverterer sertifikatet til JKS
-RUN keytool -importkeystore \
-        -srckeystore ${APP_DIR}/auth.p12 \
-        -srcstorepass ${KS_PASS} \
-        -srcstoretype pkcs12 \
-        -srcalias ${KS_ALIAS} \
-        -deststoretype pkcs12 \
-        -destkeystore ${APP_DIR}/auth.jks \
-        -deststorepass ${KS_PASS} \
-        -destalias ${KS_ALIAS}  && \
-    chown -R java:java ${APP_DIR}
+# RUN keytool -importkeystore \
+#        -srckeystore ${APP_DIR}/auth.p12 \
+#        -srcstorepass ${KS_PASS} \
+#        -srcstoretype pkcs12 \
+#        -srcalias ${KS_ALIAS} \
+#        -deststoretype pkcs12 \
+#        -destkeystore ${APP_DIR}/keystore.p12 \
+#        -deststorepass ${KS_PASS} \
+#        -destalias ${KS_ALIAS}  && \
+RUN chown -R java:java ${APP_DIR}
 
 # Opprydding
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -66,5 +66,5 @@ EXPOSE 2222 9093
 # HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:9093/manage/health || exit 1
 WORKDIR ${APP_DIR}
 ARG profile=staging
-ENV APP_ENV=${profile}
+ENV SPRING_PROFILES_ACTIVE=${profile}
 LABEL version "0.7"
