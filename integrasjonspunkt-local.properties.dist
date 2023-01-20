@@ -2,7 +2,7 @@
 server.port=${SERVER_PORT}
 
 # Organisasjonens regnr
-difi.move.org.number="${ORG_NR}"
+difi.move.org.number=${ORG_NR}
 
 # Virksomhetssertifikat 2021
 difi.move.org.keystore.alias=${KEYSTORE_ALIAS}
