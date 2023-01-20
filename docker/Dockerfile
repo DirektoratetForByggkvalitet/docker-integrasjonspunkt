@@ -57,11 +57,11 @@ ADD auth.p12 ${APP_DIR}/auth.p12
 #        -deststoretype pkcs12 \
 #        -destkeystore ${APP_DIR}/keystore.p12 \
 #        -deststorepass ${KS_PASS} \
-#        -destalias ${KS_ALIAS}  && \
-RUN chown -R java:java ${APP_DIR}
+#        -destalias ${KS_ALIAS}
 
 # Opprydding
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN chown -R java:java ${APP_DIR} && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 EXPOSE 2222 9093
 # HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:9093/manage/health || exit 1
 WORKDIR ${APP_DIR}
