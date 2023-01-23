@@ -43,7 +43,7 @@ Litt om miljøvariablene i Bitbucket
 | DPE_ENABLE | Slår på eller av funksjonalitet mot eInnsyn | true |
 | DPV_ENABLE | Slår på eller av funksjonalitet mot Digital Post til Virksomheter (via Altinn) | true |
 | DPV_USERNAME | Brukernavn for DPV | dibk |
-| DPV_PASSWORD | Passord for DPB | |
+| DPV_PASSWORD | Passord for DPV | |
 | AUTH_ENABLE | Slår på eller av autentisering av bruker | false |
 | AUTH_USERNAME | Brukernavn for autentisering | |
 | AUTH_PASSWORD | Passord for autentisering | |
@@ -56,4 +56,4 @@ Litt om miljøvariablene i Bitbucket
 
 1. Virksomhetssertfikatet for DiBK må ligge i Key Vault spesifisert med variabelen AZURE_KV_NAME, og sertifikatet må ha et navn som korresponderer med variabelen AZURE_KV_CERT_NAME.
 2. CA-sertifikatene til BuyPass og/eller Commfides må være tilgjengelige, slik at de kan bli installerte i Java sin truststore. URL til disse er satt opp i [bitbucket-pipelines.yml](bitbucket-pipelines.yml), og må endres dersom de ikke lenger fungerer.
-3. Tjenernavnet til Altinn sitt produksjonsmiljø (**tt02.altinn.no**) finnes som build-arg ALTINN_HOST i [Dockerfile](docker/Dockerfile). Dette brukes også til å legge tjenerens sertifikat inn i truststore. Dersom Altinn bytter navn på tjeneren kan man endre variabelen **ALTINN_HOST** i Repository-variablene.
+3. Tjenernavnet til Altinn sitt produksjonsmiljø (**tt02.altinn.no**) finnes som build-arg ALTINN_HOST i [Dockerfile](docker/Dockerfile). Dette brukes også til å legge tjenerens sertifikat inn i truststore. Dersom Altinn bytter navn på tjeneren kan man endre variabelen **ALTINN_HOST** i Repository-variablene

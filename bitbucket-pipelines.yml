@@ -9,8 +9,6 @@ pipelines:
   default:
     - step: 
         name: 'Bygger DiBK sitt Digdir-integrasjonspunkt'
-        runs-on:
-          - "self.hosted"
         services:
           - docker
         caches:
@@ -28,7 +26,6 @@ pipelines:
           - mkdir -p docker/trustcerts
           - curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/BPClass3RootCA.cer"
           - curl -Lso docker/trustcerts/CommfidesClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/cpn%20rootca%20sha256%20class%203.crt"
-          - curl -Lso docker/trustcerts/BuyPassClass3TestRootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/test/Buypass_Class_3_Test4_Root_CA.cer"
           - empty=
           - echo "Oppretter passord på virksomhetssertifikatet"
           - openssl pkcs12 -in vs-auth.p12 -passin pass:$empty -nodes -out vs-auth.pem
