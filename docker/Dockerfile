@@ -17,7 +17,8 @@ ENTRYPOINT ["/init"]
 
 # Oppsett for cacerts + oppretting av brukeren java
 ARG APP_DIR=/opt/integrasjonspunkt
-ENV APP_DIR=${APP_DIR} CERTHOST=tt02.altinn.no CERTPORT=443 TRUSTSTOREFILE=${JAVA_HOME}/lib/security/cacerts TRUSTSTOREPASS=changeit
+ARG ALTINN_HOST=tt02.altinn.no
+ENV APP_DIR=${APP_DIR} CERTHOST=${ALTINN_HOST} CERTPORT=443 TRUSTSTOREFILE=${JAVA_HOME}/lib/security/cacerts TRUSTSTOREPASS=changeit
 # Legger til CA-sertifikater fra BuyPass og Commfides
 ADD docker/trustcerts /tmp/trustcerts
 RUN mkdir -p ${APP_DIR} && \
