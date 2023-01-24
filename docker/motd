@@ -1,7 +1,0 @@
-####################################################
- V E L K O M M E N   T I L   A P P   S E R V I C E
-####################################################
-Dette er et Docker image for App Service som tilbyr:
-  – Digdir Integrasjonspunkt (port 9093)
-  - SSH (port 2222)
------------------------------------------------------

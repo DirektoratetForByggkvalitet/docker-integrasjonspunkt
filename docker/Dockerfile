@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates cu
 
 # Installerer s6-overlay
 ARG S6_OVERLAY_VERSION=3.1.3.0
-RUN ARCH=x86_64 && \ 
-    curl -Lo /tmp/s6-overlay-noarch.tar.xz  https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz && \
+ARG ARCH=x86_64
+RUN curl -Lo /tmp/s6-overlay-noarch.tar.xz  https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz && \
     tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
     curl -Lo /tmp/s6-overlay-${ARCH}.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${ARCH}.tar.xz && \
     tar -C / -Jxpf /tmp/s6-overlay-${ARCH}.tar.xz
@@ -33,16 +33,17 @@ RUN mkdir -p ${APP_DIR} && \
     done && \
     rm -rf /tmp/trustcerts
 
-ARG APP_VERSION="latest"
+ARG APP_VERSION=2.12.0
+ENV APP_VERSION=${APP_VERSION}
 ARG MAVEN_REPO=https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt
 ADD ${MAVEN_REPO}/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar /opt/integrasjonspunkt/app.jar
 
 # Oppsett for openssh-server
 ADD docker/sshd_config /etc/ssh/sshd_config
+ADD docker/motd.sh /etc/profile.d/motd.sh
 RUN update-ca-certificates && \
     echo "root:Docker!" | chpasswd
-ADD docker/services.d /etc/services.d
-ADD docker/motd /etc/motd
+ADD docker/s6-rc.d /etc/s6-overlay/s6-rc.d
 
 ENV PORT=9093 SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.properties
@@ -50,10 +51,10 @@ ARG KS_PASS
 ARG KS_ALIAS=dibk
 ADD auth.p12 ${APP_DIR}/auth.p12
 # Java Cryptography Extension
-ADD docker/JCE/local_policy.jar ${JAVA_HOME}/jre/lib/security/unlimited/local_policy.jar
-ADD docker/JCE/local_policy.jar ${JAVA_HOME}/jre/lib/security/limited/local_policy.jar
-ADD docker/JCE/US_export_policy.jar ${JAVA_HOME}/jre/lib/security/unlimited/US_export_policy.jar
-ADD docker/JCE/US_export_policy.jar ${JAVA_HOME}/jre/lib/security/limited/US_export_policy.jar
+# ADD docker/JCE/local_policy.jar ${JAVA_HOME}/jre/lib/security/unlimited/local_policy.jar
+# ADD docker/JCE/local_policy.jar ${JAVA_HOME}/jre/lib/security/limited/local_policy.jar
+# ADD docker/JCE/US_export_policy.jar ${JAVA_HOME}/jre/lib/security/unlimited/US_export_policy.jar
+# ADD docker/JCE/US_export_policy.jar ${JAVA_HOME}/jre/lib/security/limited/US_export_policy.jar
 
 # Konverterer sertifikatet til JKS
 # RUN keytool -importkeystore \
