@@ -50,22 +50,6 @@ ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.proper
 ARG KS_PASS
 ARG KS_ALIAS=dibk
 ADD auth.p12 ${APP_DIR}/auth.p12
-# Java Cryptography Extension
-# ADD docker/JCE/local_policy.jar ${JAVA_HOME}/jre/lib/security/unlimited/local_policy.jar
-# ADD docker/JCE/local_policy.jar ${JAVA_HOME}/jre/lib/security/limited/local_policy.jar
-# ADD docker/JCE/US_export_policy.jar ${JAVA_HOME}/jre/lib/security/unlimited/US_export_policy.jar
-# ADD docker/JCE/US_export_policy.jar ${JAVA_HOME}/jre/lib/security/limited/US_export_policy.jar
-
-# Konverterer sertifikatet til JKS
-# RUN keytool -importkeystore \
-#        -srckeystore ${APP_DIR}/auth.p12 \
-#        -srcstorepass ${KS_PASS} \
-#        -srcstoretype pkcs12 \
-#        -srcalias ${KS_ALIAS} \
-#        -deststoretype pkcs12 \
-#        -destkeystore ${APP_DIR}/keystore.p12 \
-#        -deststorepass ${KS_PASS} \
-#        -destalias ${KS_ALIAS}
 
 # Opprydding
 RUN chown -R java:java ${APP_DIR} && \
@@ -77,4 +61,3 @@ ARG profile=staging
 ENV SPRING_PROFILES_ACTIVE=${profile}
 ARG JAVA_OPTS="-Xmx2g"
 ENV JAVA_OPTS=${JAVA_OPTS}
-LABEL version "0.7"
