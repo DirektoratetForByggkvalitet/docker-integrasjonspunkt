@@ -26,6 +26,7 @@ RUN mkdir -p ${APP_DIR} && \
     keytool -import -noprompt -trustcacerts -alias ${CERTHOST} -file ${CERTHOST}.cert \
         -keystore ${TRUSTSTOREFILE} -storepass ${TRUSTSTOREPASS} && \
     groupadd -o -g 1000 java && useradd -o -r -m -u 1000 -g 1000 java && \
+    rm ${CERTHOST}.cert && \
     echo "Importerer CA-sertifikater fra BuyPass og Commfides til cacerts" && \
     for FILE in /tmp/trustcerts/*; do \
         keytool -import -noprompt -trustcacerts -alias "${FILE%.*}" -file "${FILE}" \
