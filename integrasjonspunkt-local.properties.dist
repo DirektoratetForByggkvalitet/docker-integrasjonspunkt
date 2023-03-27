@@ -15,6 +15,7 @@ difi.move.feature.enableDPE=${DPE_ENABLE}
 
 # Digital post til innbyggere
 difi.move.feature.enableDPI=${DPI_ENABLE}
+difi.move.dpi.client-type=json
 
 ## Digital post private virksomheter (Settes kun dersom man bruker DPV via integrasjonspunktet. Fjern utkommentering (#))
 ##----------------------------------
@@ -39,21 +40,22 @@ difi.activemq.broker-url=vm://localhost
 
 ## FIKS - SvarUt/SvarInn (Settes kun ved bruk av SvarUt/SvarInn)
 ##----------------------
-#difi.move.feature.enableDPF=true
+difi.move.feature.enableDPF=${DPF_ENABLE}
 
 ## SvarInn (mottaker)
-#difi.move.fiks.inn.username=
-#difi.move.fiks.inn.password=
+difi.move.fiks.inn.username=${SVARINN_USER}
+difi.move.fiks.inn.password=${SVARINN_PASSWORD}
 
 ## SvarUt (avsender)
-#difi.move.fiks.ut.username=
-#difi.move.fiks.ut.password=
+difi.move.fiks.ut.username=${SVARUT_USER}
+difi.move.fiks.ut.password=${SVARUT_PASSWORD}
 
 ## innstillinger for fiks mailsending
-#difi.move.mail.smtpHost=
-#difi.move.mail.smtpPort=
-#difi.move.mail.receiverAddress=
-#difi.move.mail.senderAddress=
-#difi.move.fiks.inn.mailOnError=false
-#difi.move.mail.enableAuth=false
-#difi.move.mail.trust=${difi.move.mail.smtpHost}
+difi.move.mail.smtpHost=${MAIL_HOST}
+difi.move.mail.smtpPort=${MAIL_PORT}
+difi.move.mail.receiverAddress=${MAIL_TO}
+difi.move.mail.senderAddress=${MAIL_FROM}
+difi.move.mail.properties.mail.smtp.starttls=${MAIL_TLS}
+difi.move.fiks.inn.mailOnError=${MAIL_ONERROR}
+difi.move.mail.enableAuth=${MAIL_AUTH}
+difi.move.mail.trust=${difi.move.mail.smtpHost}
