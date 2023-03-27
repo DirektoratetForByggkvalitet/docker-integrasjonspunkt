@@ -51,11 +51,12 @@ definitions:
 
 pipelines:
   default:
-    - parallel:
-      - step:
-          <<: *buildImage
-          name: 'Bygger integrasjonspunkt for staging-miljøet'
-          deployment: Staging
+    - step:
+        <<: *buildImage
+        name: 'Bygger integrasjonspunkt for staging-miljøet'
+        deployment: Staging
+  custom:
+    build-production:
       - step:
           <<: *buildImage
           name: 'Bygger integrasjonspunkt for produksjon'
