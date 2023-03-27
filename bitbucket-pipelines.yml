@@ -2,7 +2,7 @@
 # APP_ENV   production|staging  Hvilket miljø som integrasjonspunktet skal bruke
 # AZURE_KV_CERT_NAME  Navn på virksomhetssertifikatet i Azure Key Vault. Skal være et test-sertifikat for APP_ENV=staging
 # AZURE_KV_NAME Navn på Azure Key Vault
-# Service Principa: Må ha tilgang til å laste ned secret fra Key Vault, samt contribute for Azure Container Registry
+# Service Principal: Må ha tilgang til å laste ned secret fra Key Vault, samt contribute for Azure Container Registry
 # AZURE_SP_ID   Client ID for Service Principal i Azure
 # AZURE_SP_SECRET Secret for Azure SP
 # AZURE_TENANT_ID Tenant-ID for Service Principal i Azure
@@ -46,8 +46,13 @@ definitions:
           - docker build . --pull -t ${IMAGE_NAME} --build-arg ALTINN_HOST=${ALTINN_HOST} --build-arg APP_VERSION=${IP_VER} --build-arg profile=${APP_ENV} --build-arg KS_PASS=${KEYSTORE_PASS} --build-arg KS_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
           - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_ENV}-${IP_VER}
           - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_ENV}
-          - docker push ${IMAGE_NAME}:${APP_ENV}
-          - docker push ${IMAGE_NAME}:${APP_ENV}-${IP_VER}
+          - if [ "$APP_ENV" = "production" ]; then
+          -   docker push ${IMAGE_NAME}
+          -   docker push ${IMAGE_NAME}:${IP_VER}
+          - else
+          -   docker push ${IMAGE_NAME}:${APP_ENV}
+          -   docker push ${IMAGE_NAME}:${APP_ENV}-${IP_VER}
+          - fi
 
 pipelines:
   default:
