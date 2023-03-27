@@ -1,13 +1,20 @@
+# MILJØVARIABLER
+# APP_ENV   production|staging  Hvilket miljø som integrasjonspunktet skal bruke
+# AZURE_KV_CERT_NAME  Navn på virksomhetssertifikatet i Azure Key Vault. Skal være et test-sertifikat for APP_ENV=staging
+# AZURE_KV_NAME Navn på Azure Key Vault
+# Service Principa: Må ha tilgang til å laste ned secret fra Key Vault, samt contribute for Azure Container Registry
+# AZURE_SP_ID   Client ID for Service Principal i Azure
+# AZURE_SP_SECRET Secret for Azure SP
+# AZURE_TENANT_ID Tenant-ID for Service Principal i Azure
+
 image: atlassian/default-image:3 # Uses Atlassian's default image as default
 
 definitions:
   scripts:
     - script: &registryLogin
         echo ${AZURE_SP_SECRET} | docker login --username ${AZURE_SP_ID} --password-stdin ${DOCKER_REGISTRY}
-
-pipelines:
-  default:
-    - step: 
+  steps:
+    - step: &buildImage
         name: 'Bygger DiBK sitt Digdir-integrasjonspunkt'
         services:
           - docker
@@ -37,7 +44,21 @@ pipelines:
           - *registryLogin
           - IMAGE_NAME=${DOCKER_REGISTRY}/app/integrasjonspunkt
           - docker build . --pull -t ${IMAGE_NAME} --build-arg ALTINN_HOST=${ALTINN_HOST} --build-arg APP_VERSION=${IP_VER} --build-arg profile=${APP_ENV} --build-arg KS_PASS=${KEYSTORE_PASS} --build-arg KS_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
-          - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${IP_VER}
-          - docker push ${IMAGE_NAME}
-          - docker push ${IMAGE_NAME}:${IP_VER}
+          - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_ENV}-${IP_VER}
+          - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_ENV}
+          - docker push ${IMAGE_NAME}:${APP_ENV}
+          - docker push ${IMAGE_NAME}:${APP_ENV}-${IP_VER}
+
+pipelines:
+  default:
+    - parallel:
+      - step:
+          <<: *buildImage
+          name: 'Bygger integrasjonspunkt for staging-miljøet'
+          deployment: Staging
+      - step:
+          <<: *buildImage
+          name: 'Bygger integrasjonspunkt for produksjon'
+          deployment: Production
+          
 
