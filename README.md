@@ -37,7 +37,7 @@ Litt om miljøvariablene i Bitbucket
 | KEYSTORE_PATH | URL til keystore-fila som har virksomhetssertifikatet | file:auth.p12 |
 | KEYSTORE_TYPE | Type keystore-fil | PKCS12 |
 | KEYSTORE_ALIAS | Friendly-name eller alias til sertfikatet i keystore-fila | dibk |
-| KEYSTORE_PASS | Passordet som brukes til keystore og sertifikat | |
+| KEYSTORE_PASS | Passordet som settes til keystore og sertifikat, blir satt under bygging | |
 | DPI_ENABLE | Slår på eller av funksjonaliteten Digital Post for Innbyggere (DigiPost o.l.) | false |
 | DPE_ENABLE | Slår på eller av funksjonalitet mot eInnsyn | true |
 | DPV_ENABLE | Slår på eller av funksjonalitet mot Digital Post til Virksomheter (via Altinn) | true |
