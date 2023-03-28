@@ -46,6 +46,7 @@ definitions:
           - docker build . --pull -t ${IMAGE_NAME} --build-arg ALTINN_HOST=${ALTINN_HOST} --build-arg APP_VERSION=${IP_VER} --build-arg profile=${APP_ENV} --build-arg KS_PASS=${KEYSTORE_PASS} --build-arg KS_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
           - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_ENV}-${IP_VER}
           - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_ENV}
+          - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${IP_VER}
           - if [ "$APP_ENV" = "production" ]; then
           -   docker push ${IMAGE_NAME}
           -   docker push ${IMAGE_NAME}:${IP_VER}
