@@ -48,9 +48,11 @@ definitions:
           - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_ENV}
           - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${IP_VER}
           - if [ "$APP_ENV" = "production" ]; then
+          -   echo "Push av produksjonsversjon"
           -   docker push ${IMAGE_NAME}
           -   docker push ${IMAGE_NAME}:${IP_VER}
           - else
+          -   echo "Push av staging-versjon"
           -   docker push ${IMAGE_NAME}:${APP_ENV}
           -   docker push ${IMAGE_NAME}:${APP_ENV}-${IP_VER}
           - fi
