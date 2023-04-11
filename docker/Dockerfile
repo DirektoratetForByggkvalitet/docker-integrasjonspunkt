@@ -1,5 +1,6 @@
-FROM eclipse-temurin:8u352-b08-jre
-LABEL no.dibk.description "Docker-image for Digdir integrasjonspunkt, basert på eclipse-temurin 8u352"
+FROM eclipse-temurin:20-jre
+#FROM eclipse-temurin:8u352-b08-jre
+LABEL no.dibk.description "Docker-image for Digdir integrasjonspunkt, basert på eclipse-temurin"
 LABEL no.dibk.author "Eirik Wulff <ew@dibk.no>"
 
 ENV TERM=xterm DEBIAN_FRONTEND=noninteractive
@@ -50,7 +51,7 @@ ADD docker/motd.sh /etc/profile.d/motd.sh
 RUN update-ca-certificates && \
     echo "root:Docker!" | chpasswd
 ADD docker/s6-rc.d /etc/s6-overlay/s6-rc.d
-RUN chmod -R 644 "/etc/s6-overlay/s6-rc.d/*" && chmod -R a+rX "/etc/s6-overlay/s6-rc.d/*"
+RUN chmod -R 644 /etc/s6-overlay/s6-rc.d/* && chmod -R a+rX /etc/s6-overlay/s6-rc.d/*
 
 ARG serverport=9093
 ENV SERVER_PORT=${serverport} SSH_PORT=2222 TZ="Europe/Oslo"
