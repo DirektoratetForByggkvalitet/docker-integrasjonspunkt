@@ -11,13 +11,18 @@ ARG S6_OVERLAY_VERSION=3.1.4.2
 ARG ARCH=x86_64
 RUN curl -Lo /tmp/s6-overlay-noarch.tar.xz  https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz && \
     tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
+    curl -Lo /tmp/s6-overlay-symlinks-noarch.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz && \
+    tar -C / -Jxpf /tmp/s6-overlay-symlinks-noarch.tar.xz && \
     curl -Lo /tmp/s6-overlay-${ARCH}.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${ARCH}.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-${ARCH}.tar.xz
+    tar -C / -Jxpf /tmp/s6-overlay-${ARCH}.tar.xz && \
+    curl -Lo /tmp/s6-overlay-symlinks-arch.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-arch.tar.xz && \
+    tar -C / -Jxpf /tmp/s6-overlay-symlinks-arch.tar.xz && \
+    rm /tmp/*.tar.xz
 ENTRYPOINT ["/init"]
 
 # Oppsett for cacerts + oppretting av brukeren java
 ARG APP_DIR=/opt/integrasjonspunkt
-ARG ALTINN_HOST=tt02.altinn.no
+ARG ALTINN_HOST=altinn.no
 ENV APP_DIR=${APP_DIR} CERTHOST=${ALTINN_HOST} CERTPORT=443 TRUSTSTOREFILE=${JAVA_HOME}/lib/security/cacerts TRUSTSTOREPASS=changeit
 # Legger til CA-sertifikater fra BuyPass og Commfides
 ADD docker/trustcerts /tmp/trustcerts
@@ -45,11 +50,10 @@ ADD docker/motd.sh /etc/profile.d/motd.sh
 RUN update-ca-certificates && \
     echo "root:Docker!" | chpasswd
 ADD docker/s6-rc.d /etc/s6-overlay/s6-rc.d
+RUN chmod -R 644 "/etc/s6-overla7/s6-rc.d/*" && chmod -R a+rX "/etc/s6-overla7/s6-rc.d/*"
 
 ARG serverport=9093
-ENV SERVER_PORT=${serverport}
-
-ENV PORT=${SERVER_PORT} SSH_PORT=2222 TZ="Europe/Oslo"
+ENV SERVER_PORT=${serverport} SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.properties
 ARG KS_PASS
 ARG KS_ALIAS=dibk
