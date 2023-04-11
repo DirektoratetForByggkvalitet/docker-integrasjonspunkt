@@ -7,7 +7,7 @@ ENV TERM=xterm DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates curl openssl xz-utils
 
 # Installerer s6-overlay
-ARG S6_OVERLAY_VERSION=3.1.3.0
+ARG S6_OVERLAY_VERSION=3.1.4.2
 ARG ARCH=x86_64
 RUN curl -Lo /tmp/s6-overlay-noarch.tar.xz  https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz && \
     tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
