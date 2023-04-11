@@ -1,5 +1,5 @@
 # Port for innkommende kommunikasjon
-server.port=${SERVER_PORT}
+# server.port=${SERVER_PORT}
 
 # Organisasjonens regnr
 difi.move.org.number=${ORG_NR}

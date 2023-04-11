@@ -46,7 +46,10 @@ RUN update-ca-certificates && \
     echo "root:Docker!" | chpasswd
 ADD docker/s6-rc.d /etc/s6-overlay/s6-rc.d
 
-ENV PORT=9093 SSH_PORT=2222 TZ="Europe/Oslo"
+ARG serverport=9093
+ENV SERVER_PORT=${serverport}
+
+ENV PORT=${SERVER_PORT} SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.properties
 ARG KS_PASS
 ARG KS_ALIAS=dibk
