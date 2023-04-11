@@ -50,7 +50,7 @@ ADD docker/motd.sh /etc/profile.d/motd.sh
 RUN update-ca-certificates && \
     echo "root:Docker!" | chpasswd
 ADD docker/s6-rc.d /etc/s6-overlay/s6-rc.d
-RUN chmod -R 644 "/etc/s6-overla7/s6-rc.d/*" && chmod -R a+rX "/etc/s6-overla7/s6-rc.d/*"
+RUN chmod -R 644 "/etc/s6-overlay/s6-rc.d/*" && chmod -R a+rX "/etc/s6-overlay/s6-rc.d/*"
 
 ARG serverport=9093
 ENV SERVER_PORT=${serverport} SSH_PORT=2222 TZ="Europe/Oslo"
