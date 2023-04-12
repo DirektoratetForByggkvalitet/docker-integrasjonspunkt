@@ -61,7 +61,7 @@ ARG KS_ALIAS=dibk
 ADD auth.p12 ${APP_DIR}/auth.p12
 
 # Opprydding
-RUN chown -R java:java ${APP_DIR}
+RUN chown -R java:java ${APP_DIR} && cd /etc/ssh && ssh-keygen -A
 
 EXPOSE 2222 9093
 # HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:9093/manage/health || exit 1
