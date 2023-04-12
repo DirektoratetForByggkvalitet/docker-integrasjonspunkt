@@ -33,7 +33,7 @@ Litt om miljøvariablene i Bitbucket
 | Variabelnavn | Beskrivelse | Standardverdi |
 | ----- | ----- | ----- |
 | APP_ENV | Miljøet appen skal knyttes seg mot | production |
-| SERVER_PORT | Porten integrasjonspunktet skal benytte | 9093 |
+| SERVER_PORT | Porten integrasjonspunktet skal benytte. Siden integrasjonspunktet ikke kjører som root må dette være en ikke-priviligert port | 9093 |
 | ORG_NR | Organisasjonsnummeret til DiBK (organisasjonen som eier virksomhetssertifikatet) | 974760223 |
 | KEYSTORE_PATH | URL til keystore-fila som har virksomhetssertifikatet | file:auth.p12 |
 | KEYSTORE_TYPE | Type keystore-fil | PKCS12 |
