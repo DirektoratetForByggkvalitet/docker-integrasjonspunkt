@@ -52,8 +52,8 @@ RUN update-ca-certificates && \
 ADD docker/s6-rc.d /etc/s6-overlay/s6-rc.d
 RUN chmod -R 644 /etc/s6-overlay/s6-rc.d/* && chmod -R a+rX /etc/s6-overlay/s6-rc.d/*
 
-ARG serverport=9093
-ENV SERVER_PORT=${serverport} SSH_PORT=2222 TZ="Europe/Oslo"
+ARG SERVER_PORT=80
+ENV SERVER_PORT=${SERVER_PORT} SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.properties
 ARG KS_PASS
 ARG KS_ALIAS=dibk
@@ -62,7 +62,7 @@ ADD auth.p12 ${APP_DIR}/auth.p12
 # Opprydding
 RUN chown -R java:java ${APP_DIR} && ssh-keygen -A && echo "" > /etc/motd
 
-EXPOSE 2222 9093
+EXPOSE 2222 ${SERVER_PORT}
 # HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:9093/manage/health || exit 1
 WORKDIR ${APP_DIR}
 ARG profile=staging

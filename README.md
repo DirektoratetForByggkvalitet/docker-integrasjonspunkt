@@ -5,14 +5,15 @@ Docker-image som kjører DiBK sitt integrasjonspunkt mot Digdir i Azure.
 Integrasjonspunktet kjører med støtte fra MySQL-database, og lagrer dermed ingenting lokalt.
 
 Konfigurasjonsfilen befolkes fra Bitbucket Pipelines ved bygging. Samtidig hentes også virksomhetssertifikatet fra Azure Key Vault, og public key lagres til en pkcs12-fil.
-## Innstillinger for App Service
+
+## Innstillinger for Web App
 
 - Settes opp som en Web App med Docker-konteiner fra **dibknoe.azurecr.io/app/integrasjonspunkt**
 - Continous deployment slås på 
-- **WEBSITES_PORT** må settes til 9093
 - **WEBSITES_CONTAINER_START_TIME_LIMIT** bør settes til minst 300 sekunder (standard er 230 sekunder, maks er 1800). Dette for at konteineren skal ha tid til å starte opp. Normalt sett starter den dog opp på under 180 sekunder.
 - Startup er automatisk, og trenger ingen innstillinger
 - Health Check kan settes opp med URL /manage/health
+- PS! Hvis SERVER_PORT settes til noe annet enn 80 må **WEBSITES_PORT** settes til samme verdi
 
 ## Miljøvariabler ##
 

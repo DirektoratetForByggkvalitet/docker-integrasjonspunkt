@@ -43,7 +43,7 @@ definitions:
           - echo "Bruker versjon $IP_VER"
           - *registryLogin
           - IMAGE_NAME=${DOCKER_REGISTRY}/app/integrasjonspunkt
-          - docker build . --pull -t ${IMAGE_NAME} --build-arg serverport=${SERVER_PORT} --build-arg ALTINN_HOST=${ALTINN_HOST} --build-arg APP_VERSION=${IP_VER} --build-arg profile=${APP_ENV} --build-arg KS_PASS=${KEYSTORE_PASS} --build-arg KS_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
+          - docker build . --pull -t ${IMAGE_NAME} --build-arg ALTINN_HOST=${ALTINN_HOST} --build-arg APP_VERSION=${IP_VER} --build-arg profile=${APP_ENV} --build-arg KS_PASS=${KEYSTORE_PASS} --build-arg KS_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
           - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_ENV}-${IP_VER}
           - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_ENV}
           - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${IP_VER}
@@ -58,11 +58,12 @@ definitions:
           - fi
 
 pipelines:
-  default:
-    - step:
-        <<: *buildImage
-        name: 'Bygger integrasjonspunkt for staging-miljøet'
-        deployment: Staging
+  branches:
+    master:
+      - step:
+          <<: *buildImage
+          name: 'Bygger integrasjonspunkt for staging-miljøet'
+          deployment: Staging
   custom:
     build-production:
       - step:

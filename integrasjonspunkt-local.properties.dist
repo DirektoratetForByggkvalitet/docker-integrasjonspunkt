@@ -1,7 +1,7 @@
-# Port for innkommende kommunikasjon
+# Port for innkommende kommunikasjon, settes som miljøvariabelen SERVER_PORT i Dockerfile
 # server.port=${SERVER_PORT}
 
-# Organisasjonens regnr
+# Organisasjonens regnr, kan også settes som miljøvariabelen DIFI_MOVE_ORG_NUMBER
 difi.move.org.number=${ORG_NR}
 
 # Virksomhetssertifikat 2021
@@ -10,7 +10,7 @@ difi.move.org.keystore.password=${KEYSTORE_PASS}
 difi.move.org.keystore.path=${KEYSTORE_PATH}
 difi.move.org.keystore.type=${KEYSTORE_TYPE}
 
-#eInnsyn
+# eInnsyn - DIFI_MOVE_FEATURE_ENABLE_DPE
 difi.move.feature.enableDPE=${DPE_ENABLE}
 
 # Digital post til innbyggere
