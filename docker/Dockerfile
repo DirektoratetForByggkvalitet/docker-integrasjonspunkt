@@ -1,5 +1,4 @@
-FROM eclipse-temurin:8-jre-alpine
-#FROM eclipse-temurin:8u352-b08-jre
+FROM eclipse-temurin:17-jre-alpine
 LABEL no.dibk.description "Docker-image for Digdir integrasjonspunkt, basert på eclipse-temurin"
 LABEL no.dibk.author "Eirik Wulff <ew@dibk.no>"
 
@@ -61,7 +60,7 @@ ARG KS_ALIAS=dibk
 ADD auth.p12 ${APP_DIR}/auth.p12
 
 # Opprydding
-RUN chown -R java:java ${APP_DIR} && ssh-keygen -A
+RUN chown -R java:java ${APP_DIR} && ssh-keygen -A && echo "" > /etc/motd
 
 EXPOSE 2222 9093
 # HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:9093/manage/health || exit 1
