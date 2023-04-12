@@ -21,7 +21,7 @@ RUN curl -Lo /tmp/s6-overlay-noarch.tar.xz  https://github.com/just-containers/s
 ENTRYPOINT ["/init"]
 
 # Oppsett for cacerts + oppretting av brukeren java
-ARG APP_DIR=/opt/integrasjonspunkt
+ARG APP_DIR=/app/integrasjonspunkt
 ARG ALTINN_HOST=altinn.no
 ENV APP_DIR=${APP_DIR} CERTHOST=${ALTINN_HOST} CERTPORT=443 TRUSTSTOREFILE=${JAVA_HOME}/lib/security/cacerts TRUSTSTOREPASS=changeit
 # Legger til CA-sertifikater fra BuyPass og Commfides
@@ -42,7 +42,7 @@ RUN mkdir -p ${APP_DIR} && \
 ARG APP_VERSION=2.15.0
 ENV APP_VERSION=${APP_VERSION}
 ARG MAVEN_REPO=https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt
-ADD ${MAVEN_REPO}/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar /opt/integrasjonspunkt/app.jar
+ADD ${MAVEN_REPO}/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar ${APP_DIR}/app.jar
 
 # Oppsett for openssh-server
 ADD docker/sshd_config /etc/ssh/sshd_config

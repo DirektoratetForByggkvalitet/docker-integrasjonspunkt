@@ -2,18 +2,26 @@
 
 Docker-image som kjører DiBK sitt integrasjonspunkt mot Digdir i Azure. 
 
+Idéen er at integrasjonspunktet kjører i docker, med en web app foran. På den måten kan man gjøre HTTPS-kryptering og IP-whitelisting **utenfor** selve integrasjonspunktet, og vi kan bruke Azure Virtual Network og NAT gateway til å sikre én utgående IP-adresse for integrasjonspunktet. Det gjør det enkelt å få tilgang til Altinn og andre formidlere som bruker IP-whitelisting.
+
 Integrasjonspunktet kjører med støtte fra MySQL-database, og lagrer dermed ingenting lokalt.
 
 Konfigurasjonsfilen befolkes fra Bitbucket Pipelines ved bygging. Samtidig hentes også virksomhetssertifikatet fra Azure Key Vault, og public key lagres til en pkcs12-fil.
 
+I bruk vil tjenesten fungere som en vanlig web app i Azure, og man kan legge på custom domains, SSL og slikt som man selv vil. Man kan også legge på brukernavn og passord på selve integrasjonspunktet, se AUTH-variablene under.
+
+Man kan bruke SSH-koblingen i Azure-portalen for å gå inn i integrasjonspunktets miljø. Bruk kommandoen "with-contenv bash" for å få tilgang til alle miljøvariabler i konteineren. Integrasjonspunktet kjører under stien "**$APP_DIR**", som standard er **/app/integrasjonspunkt**.
+
 ## Innstillinger for Web App
 
-- Settes opp som en Web App med Docker-konteiner fra **dibknoe.azurecr.io/app/integrasjonspunkt**
-- Continous deployment slås på 
-- **WEBSITES_CONTAINER_START_TIME_LIMIT** bør settes til minst 300 sekunder (standard er 230 sekunder, maks er 1800). Dette for at konteineren skal ha tid til å starte opp. Normalt sett starter den dog opp på under 180 sekunder.
+- Settes opp som en Web App med Docker-konteiner fra ACR, Github eller annen repo med dette imaget lagret
+- Continous deployment slås på
+- Slå på automatisk omdirigering til HTTPS og sett den til å bruke HTTP 2.0 (ikke påkrevd, men kjekt)
+- **WEBSITES_PORT** må legges inn som miljøvariabel og settes til samme verdi som SERVER_PORT nedenfor (9093), eller kan også settes for å overstyre SERVER_PORT.
+- **WEBSITES_CONTAINER_START_TIME_LIMIT** bør legges inn som miljøvriabel og settes til minst 300 sekunder (standard er 230 sekunder, maks er 1800). Dette for at konteineren skal ha tid til å starte opp. Normalt sett starter den dog opp på under 180 sekunder.
+- Health Check kan settes opp mot URI **/manage/health**
 - Startup er automatisk, og trenger ingen innstillinger
-- Health Check kan settes opp med URL /manage/health
-- **WEBSITES_PORT** må settes til samme verdi som SERVER_PORT nedenfor (9093)
+- Bruk innstillingene under Network til å sette opp hvilke IP-nett som skal kunne snakke med integrasjonspunktet. Dette er viktig for sikringen av integrasjonspunktet. Documaster støtter å koble seg til integrasjonspunktet med autentisering.
 
 ## Miljøvariabler ##
 
@@ -28,12 +36,12 @@ Litt om miljøvariablene i Bitbucket
 | AZURE_SP_SECRET | Passord til Service Principal | |
 | AZURE_KV_CERT_NAME | Navnet på virksomhetssertifikatet i Key Vault | virksomhetssertifikat-auth |
 
-### Miljøvariabler for integrasjonspunktet ###
+### Miljøvariabler for integrasjonspunktet sine innstillinger ###
 
 | Variabelnavn | Beskrivelse | Standardverdi |
 | ----- | ----- | ----- |
-| APP_ENV | Miljøet appen skal knyttes seg mot | production |
-| SERVER_PORT | Porten integrasjonspunktet skal benytte. Siden integrasjonspunktet ikke kjører som root må dette være en ikke-priviligert port | 9093 |
+| APP_ENV | Miljøet appen skal knyttes seg mot, production eller staging | production |
+| SERVER_PORT | Porten integrasjonspunktet skal benytte. Siden integrasjonspunktet ikke kjører som root må dette være en ikke-priviligert port. Kan overstyres av WEBSITES_PORT i Web App-oppsettet | 9093 |
 | ORG_NR | Organisasjonsnummeret til DiBK (organisasjonen som eier virksomhetssertifikatet) | 974760223 |
 | KEYSTORE_PATH | URL til keystore-fila som har virksomhetssertifikatet | file:auth.p12 |
 | KEYSTORE_TYPE | Type keystore-fil | PKCS12 |
@@ -50,10 +58,10 @@ Litt om miljøvariablene i Bitbucket
 | DB_URL | JDBC-URL for å koble til databasen som lagrer alle data | jdbc:mysql://flexmysql-dibk.mysql.database.azure.com/integrasjonspunkt?useSSL=true&sslMode=REQUIRED&serverTimezone=UTC |
 | DB_USERNAME | Brukernavn for databasen | |
 | DB_PASSWORD | Passord for databasen | |
-| ALTINN_HOST | Navn på tjeneren som brukes til kommunikasjon med Altinn | tt02.altinn.no |
+| ALTINN_HOST | Navn på tjeneren som brukes til kommunikasjon med Altinn | altinn.no |
 
 ## Avhengigheter ##
 
 1. Virksomhetssertfikatet for DiBK må ligge i Key Vault spesifisert med variabelen AZURE_KV_NAME, og sertifikatet må ha et navn som korresponderer med variabelen AZURE_KV_CERT_NAME.
 2. CA-sertifikatene til BuyPass og/eller Commfides må være tilgjengelige, slik at de kan bli installerte i Java sin truststore. URL til disse er satt opp i [bitbucket-pipelines.yml](bitbucket-pipelines.yml), og må endres dersom de ikke lenger fungerer.
-3. Tjenernavnet til Altinn sitt produksjonsmiljø (**tt02.altinn.no**) finnes som build-arg ALTINN_HOST i [Dockerfile](docker/Dockerfile). Dette brukes også til å legge tjenerens sertifikat inn i truststore. Dersom Altinn bytter navn på tjeneren kan man endre variabelen **ALTINN_HOST** i Repository-variablene
+3. Tjenernavnet til Altinn sitt produksjonsmiljø (**altinn.no**) finnes som build-arg ALTINN_HOST i [Dockerfile](docker/Dockerfile). Dette brukes også til å legge tjenerens sertifikat inn i truststore. Dersom Altinn bytter navn på tjeneren kan man endre variabelen **ALTINN_HOST** i Repository-variablene
