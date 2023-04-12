@@ -13,7 +13,7 @@ Konfigurasjonsfilen befolkes fra Bitbucket Pipelines ved bygging. Samtidig hente
 - **WEBSITES_CONTAINER_START_TIME_LIMIT** bør settes til minst 300 sekunder (standard er 230 sekunder, maks er 1800). Dette for at konteineren skal ha tid til å starte opp. Normalt sett starter den dog opp på under 180 sekunder.
 - Startup er automatisk, og trenger ingen innstillinger
 - Health Check kan settes opp med URL /manage/health
-- PS! Hvis SERVER_PORT settes til noe annet enn 80 må **WEBSITES_PORT** settes til samme verdi
+- **WEBSITES_PORT** må settes til samme verdi som SERVER_PORT nedenfor (9093)
 
 ## Miljøvariabler ##
 

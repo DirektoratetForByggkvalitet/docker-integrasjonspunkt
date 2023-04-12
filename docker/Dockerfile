@@ -30,7 +30,7 @@ RUN mkdir -p ${APP_DIR} && \
     openssl s_client -connect ${CERTHOST}:${CERTPORT} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${CERTHOST}.cert && \
     keytool -import -noprompt -trustcacerts -alias ${CERTHOST} -file ${CERTHOST}.cert \
         -keystore ${TRUSTSTOREFILE} -storepass ${TRUSTSTOREPASS} && \
-    groupadd -o -g 1000 java && useradd -o -r -m -u 1000 -g 1000 java && \
+    groupadd -o -g 888 java && useradd -o -r -m -u 888 -g 888 java && \
     rm ${CERTHOST}.cert && \
     echo "Importerer CA-sertifikater fra BuyPass og Commfides til cacerts" && \
     for FILE in /tmp/trustcerts/*; do \
@@ -52,7 +52,7 @@ RUN update-ca-certificates && \
 ADD docker/s6-rc.d /etc/s6-overlay/s6-rc.d
 RUN chmod -R 644 /etc/s6-overlay/s6-rc.d/* && chmod -R a+rX /etc/s6-overlay/s6-rc.d/*
 
-ARG SERVER_PORT=80
+ARG SERVER_PORT=9093
 ENV SERVER_PORT=${SERVER_PORT} SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.properties
 ARG KS_PASS
