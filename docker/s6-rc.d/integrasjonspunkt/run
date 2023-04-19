@@ -1,6 +1,7 @@
 #!/command/with-contenv bash
 
 cd ${APP_DIR}
+# Korrigerer integrasjonspunktets port dersom porten endres i Azure Web App
 if [ -n "${PORT+set}" ]; then
     export SERVER_PORT=$PORT
 fi
