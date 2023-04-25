@@ -1,22 +1,39 @@
+variable "APP_VERSION" {
+  default = "2.15.0"
+}
+variable "APP_DIR" {
+  default = null
+}
+variable "APP_ENV" {
+  default = null
+}
+variable "ALTINN_HOST" {
+  default = "altinn.no"
+}
+variable "SERVER_PORT" {
+  default = "9093"
+}
+
+group "default" {
+  targets = ["staging"]
+}
+
 target "production" {
   dockerfile = "Dockerfile"
   platforms = ["linux/amd64", "linux/arm64"]
   args = {
-    APP_VERSION = "${ip_version}"
-    ALTINN_HOST = "altinn.no"
-    APP_DIR="/app/integrasjonspunkt"
+    APP_VERSION = APP_VERSION
+    ALTINN_HOST = ALTINN_HOST
+    APP_DIR = APP_DIR
+    profile = APP_ENV
+    SERVER_PORT = SERVER_PORT
   }
-  tags = ["dibknoe.azurecr.io/app/integrasjonspunkt:latest", "dibknoe.azurecr.io/app/integrasjonspunkt:${ip_version}"]
+  tags = ["dibknoe.azurecr.io/app/integrasjonspunkt:latest", "dibknoe.azurecr.io/app/integrasjonspunkt:${APP_VERSION}"]
 }
 
 target "staging" {
   inherits = ["production"]
-  args = {
-    APP_VERSION = "${ip_version}"
-    ALTINN_HOST = "tt02.altinn.no"
-    APP_DIR="/app/integrasjonspunkt"
-  }
-  tags = ["dibknoe.azurecr.io/app/integrasjonspunkt:staging", "dibknoe.azurecr.io/app/integrasjonspunkt:staging-${ip_version}"]
+  tags = ["dibknoe.azurecr.io/app/integrasjonspunkt:${APP_ENV}", "dibknoe.azurecr.io/app/integrasjonspunkt:${APP_ENV}-${APP_VERSION}"]
 }
 
 

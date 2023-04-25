@@ -37,11 +37,10 @@ definitions:
           - openssl pkcs12 -export -in vs-auth.pem -out auth.p12 -passout pass:${KEYSTORE_PASS} -name ${KEYSTORE_ALIAS}
           - echo "Finner versjonsnummer på siste versjon av integrasjonspunktet"
           - curl -Lso maven-metadata.xml "https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt/maven-metadata.xml"
-          - ip_version=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
-          - echo "Bruker versjon $ip_version av integrasjonspunktet"
+          - APP_VERSION=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
+          - echo "Bruker versjon ${APP_VERSION} av integrasjonspunktet"
           - curl -L https://depot.dev/install-cli.sh | DEPOT_INSTALL_DIR=/usr/local/bin sh
           - *registryLogin
-          - envsubst < "docker-bake.hcl" > "docker-bake.hcl"
           - if [ "$APP_ENV" = "production" ]; then
           -   depot bake --project ${DEPOT_PID} --push -f docker-bake.hcl production
           - else
