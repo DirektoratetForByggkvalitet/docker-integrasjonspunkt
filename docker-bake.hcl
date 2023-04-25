@@ -13,7 +13,6 @@ variable "ALTINN_HOST" {
 variable "SERVER_PORT" {
   default = "9093"
 }
-variable ""
 
 group "default" {
   targets = ["staging"]
