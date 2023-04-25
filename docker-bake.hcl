@@ -20,7 +20,7 @@ group "default" {
 
 target "production" {
   dockerfile = "docker/Dockerfile"
-  platforms = ["linux/amd64"]
+  platforms = ["linux/amd64", "linux/arm64"]
   args = {
     APP_VERSION = APP_VERSION
     ALTINN_HOST = ALTINN_HOST

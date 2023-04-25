@@ -1,10 +1,10 @@
-FROM eclipse-temurin:20-jre-alpine
+FROM eclipse-temurin:20-jre-jammy
 LABEL no.dibk.description "Docker-image for Digdir integrasjonspunkt, basert på eclipse-temurin"
 LABEL no.dibk.author "Eirik Wulff <ew@dibk.no>"
 
-ENV TERM=xterm
+ENV TERM=xterm DEBIAN_FRONTEND=noninteractive
 
-RUN apk add --no-cache curl tar openssl bash zsh git shadow xz openssh nano ca-certificates
+RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates curl openssl xz-utils
 
 # Installerer s6-overlay - https://github.com/just-containers/s6-overlay
 ARG S6_OVERLAY_VERSION="3.1.4.2"
@@ -52,7 +52,10 @@ ARG KS_ALIAS=dibk
 ADD auth.p12 ${APP_DIR}/auth.p12
 
 # Opprydding
-RUN chown -R java:java ${APP_DIR} && ssh-keygen -A && echo "" > /etc/motd
+RUN chown -R java:java ${APP_DIR} && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    ssh-keygen -A && \
+    echo "" > /etc/motd
 
 EXPOSE 2222 ${SERVER_PORT}
 # HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:9093/manage/health || exit 1
