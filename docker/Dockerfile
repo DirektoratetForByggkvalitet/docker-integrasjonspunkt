@@ -9,8 +9,15 @@ RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates cu
 # Installerer s6-overlay - https://github.com/just-containers/s6-overlay
 ARG S6_OVERLAY_VERSION="3.1.4.2"
 ARG TARGETARCH="amd64"
-ADD s6_install.sh /
-RUN /s6_install.sh
+RUN if [ "$TARGETARCH" = "arm64" ]; then code="aarch64"; else code="aarch64"; fi && \
+  declare -a files=("s6-overlay-noarch.tar.xz" "s6-overlay-symlinks-noarch.tar.xz" "s6-overlay-${code}.tar.xz" "s6-overlay-symlinks-arch.tar.xz") && \
+  for file in "${files[@]}"; \
+  do; \
+    echo "Behandler '${file}'"; \
+    curl -Lo /tmp/${file} https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/${file}; \
+    tar -C / -Jxpf /tmp/${file}; \
+  done && \
+  echo "S6-overlay v${S6_OVERLAY_VERSION} installert for ${TARGETARCH}"
 
 ENTRYPOINT ["/init"]
 
