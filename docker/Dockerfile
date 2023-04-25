@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre-focal
+FROM eclipse-temurin:19-jre-focal
 LABEL no.dibk.description "Docker-image for Digdir integrasjonspunkt, basert på eclipse-temurin"
 LABEL no.dibk.author "Eirik Wulff <ew@dibk.no>"
 
