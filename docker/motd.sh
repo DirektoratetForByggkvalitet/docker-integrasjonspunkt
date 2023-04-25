@@ -1,4 +1,4 @@
-#!/command/with-env bash
+#!/command/with-contenv bash
 
 d=$(date '+%d-%m-%Y %T %Z')
 echo "####################################################"
