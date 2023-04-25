@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates cu
 ARG S6_OVERLAY_VERSION="3.1.4.2"
 ARG TARGETARCH
 ADD s6_install.sh /
-RUN /s6_intall.sh
+RUN echo "Arkitektur: ${TARGETARCH}" && /s6_install.sh
 ENTRYPOINT ["/init"]
 
 # Oppsett for cacerts + oppretting av brukeren java
