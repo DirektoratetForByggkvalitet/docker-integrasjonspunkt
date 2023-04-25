@@ -1,4 +1,4 @@
-FROM eclipse-temurin:11-jre-focal
+FROM eclipse-temurin:17-jre-focal
 LABEL no.dibk.description "Docker-image for Digdir integrasjonspunkt, basert på eclipse-temurin"
 LABEL no.dibk.author "Eirik Wulff <ew@dibk.no>"
 
@@ -62,5 +62,5 @@ EXPOSE 2222 ${SERVER_PORT}
 WORKDIR ${APP_DIR}
 ARG profile=staging
 ENV SPRING_PROFILES_ACTIVE=${profile}
-ARG JAVA_OPTS="-Xmx3g"
+ARG JAVA_OPTS="-Xmx2g"
 ENV JAVA_OPTS=${JAVA_OPTS}
