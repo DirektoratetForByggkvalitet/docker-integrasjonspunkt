@@ -1,4 +1,5 @@
 ARG TARGETARCH
+ARG TARGETOS
 FROM eclipse-temurin:20-jre-jammy AS base
 LABEL no.dibk.description "Docker-image for Digdir integrasjonspunkt, basert på eclipse-temurin"
 LABEL no.dibk.author "Eirik Wulff <ew@dibk.no>"
@@ -70,10 +71,10 @@ FROM base AS amd64
 ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp
 RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
 
-FROM base AS arm64
+FROM base AS build-arm64
 # Installerer arm64-versjon av s6-overlay
 ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-aarch64.tar.xz /tmp
 RUN tar -C / -Jxpf /tmp/s6-overlay-aarch64.tar.xz
 
-FROM ${TARGETARCH} AS final
+FROM build-${TARGETARCH} AS final
 ENTRYPOINT ["/init"]

@@ -16,9 +16,6 @@ variable "SERVER_PORT" {
 variable "S6_OVERLAY_VERSION" {
   default = "3.1.4.2"
 }
-variable "TARGETARCH" {
-  default = null
-}
 
 group "default" {
   targets = ["staging"]
@@ -37,7 +34,6 @@ target "production" {
     profile = APP_ENV
     SERVER_PORT = SERVER_PORT
     S6_OVERLAY_VERSION = S6_OVERLAY_VERSION
-    TARGETARCH = TARGETARCH
   }
   tags = ["dibknoe.azurecr.io/app/integrasjonspunkt:latest", "dibknoe.azurecr.io/app/integrasjonspunkt:${APP_VERSION}"]
 }
