@@ -3,7 +3,9 @@
 : "${TARGETARCH:=}"
 : "${S6_OVERLAY_VERSION:=3.1.4.2}"
 
-echo "Installerer S6-overlay"
+echo "Installerer S6-overlay, v${S6_OVERLAY_VERSION}"
+
+# Endrer på filnavnet dersom arkitekturen er arm64.
 if [ "$TARGETARCH" = "arm64" ]; then
   ARCH="aarch64"
 else

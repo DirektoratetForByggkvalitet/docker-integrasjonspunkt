@@ -8,9 +8,9 @@ RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates cu
 
 # Installerer s6-overlay - https://github.com/just-containers/s6-overlay
 ARG S6_OVERLAY_VERSION="3.1.4.2"
-ARG TARGETARCH
+ARG TARGETARCH="amd64"
 ADD s6_install.sh /
-RUN echo "ARCH = $TARGETARCH" && /s6_install.sh
+RUN /s6_install.sh
 
 ENTRYPOINT ["/init"]
 
@@ -56,7 +56,6 @@ ADD auth.p12 ${APP_DIR}/auth.p12
 # Opprydding
 RUN chown -R java:java ${APP_DIR} && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
-    ssh-keygen -A && \
     echo "" > /etc/motd
 
 EXPOSE 2222 ${SERVER_PORT}
