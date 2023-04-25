@@ -2,7 +2,7 @@ target "production" {
   dockerfile = "Dockerfile"
   platforms = ["linux/amd64", "linux/arm64"]
   args = {
-    ip_version = "${ip_version}"
+    APP_VERSION = "${ip_version}"
     ALTINN_HOST = "altinn.no"
     APP_DIR="/app/integrasjonspunkt"
   }
@@ -12,7 +12,7 @@ target "production" {
 target "staging" {
   inherits = ["production"]
   args = {
-    ip_version = "${ip_version}"
+    APP_VERSION = "${ip_version}"
     ALTINN_HOST = "tt02.altinn.no"
     APP_DIR="/app/integrasjonspunkt"
   }

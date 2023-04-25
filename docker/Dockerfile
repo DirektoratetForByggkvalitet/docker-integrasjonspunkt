@@ -31,7 +31,7 @@ RUN mkdir -p ${APP_DIR} && \
     done && \
     rm -rf /tmp/trustcerts
 
-ARG ip_version=2.16.0
+ARG APP_VERSION=2.16.0
 ENV APP_VERSION=${ip_version}
 ARG MAVEN_REPO=https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt
 RUN curl -Lo ${APP_DIR}/app.jar ${MAVEN_REPO}/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar 
