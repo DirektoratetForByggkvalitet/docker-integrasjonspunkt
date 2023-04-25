@@ -4,7 +4,13 @@
 : "${S6_OVERLAY_VERSION:=3.1.4.2}"
 
 echo "Installerer S6-overlay"
-declare -a files=("s6-overlay-noarch.tar.xz" "s6-overlay-symlinks-noarch.tar.xz" "s6-overlay-${TARGETARCH}.tar.xz" "s6-overlay-symlinks-arch.tar.xz")
+if [ "$TARGETARCH" = "arm64" ]; then
+  ARCH="aarch64"
+else
+  ARCH=${TARGETARCH}
+fi
+
+declare -a files=("s6-overlay-noarch.tar.xz" "s6-overlay-symlinks-noarch.tar.xz" "s6-overlay-${ARCH}.tar.xz" "s6-overlay-symlinks-arch.tar.xz")
 for file in "${files[@]}"
 do
     echo "Behandler '${file}'"
