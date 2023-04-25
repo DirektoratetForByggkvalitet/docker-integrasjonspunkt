@@ -1,12 +1,17 @@
-ARG TARGETARCH
-ARG TARGETOS
-FROM eclipse-temurin:20-jre-jammy AS base
+FROM eclipse-temurin:20-jre-jammy
 LABEL no.dibk.description "Docker-image for Digdir integrasjonspunkt, basert på eclipse-temurin"
 LABEL no.dibk.author "Eirik Wulff <ew@dibk.no>"
 
 ENV TERM=xterm DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates curl openssl xz-utils
+
+# Installerer s6-overlay - https://github.com/just-containers/s6-overlay
+ARG S6_OVERLAY_VERSION="3.1.4.2"
+ARG TARGETARCH
+ADD s6_install.sh /
+RUN /s6_intall.sh
+ENTRYPOINT ["/init"]
 
 # Oppsett for cacerts + oppretting av brukeren java
 ARG APP_DIR=/app/integrasjonspunkt
@@ -59,22 +64,3 @@ ARG profile=staging
 ENV SPRING_PROFILES_ACTIVE=${profile}
 ARG JAVA_OPTS="-Xmx2g"
 ENV JAVA_OPTS=${JAVA_OPTS}
-
-# Installerer s6-overlay - https://github.com/just-containers/s6-overlay
-ARG S6_OVERLAY_VERSION="3.1.4.2"
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
-RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
-
-
-FROM base AS amd64
-# Installerer amd64-versjon av s6-overlay
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp
-RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
-
-FROM base AS build-arm64
-# Installerer arm64-versjon av s6-overlay
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-aarch64.tar.xz /tmp
-RUN tar -C / -Jxpf /tmp/s6-overlay-aarch64.tar.xz
-
-FROM build-${TARGETARCH} AS final
-ENTRYPOINT ["/init"]
