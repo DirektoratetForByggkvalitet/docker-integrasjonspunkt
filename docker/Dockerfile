@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates cu
 ARG S6_OVERLAY_VERSION="3.1.4.2"
 ARG TARGETARCH
 ADD s6_install.sh /
-RUN echo "Arkitektur: ${TARGETARCH}" && /s6_install.sh
+RUN /s6_install.sh
 ENTRYPOINT ["/init"]
 
 # Oppsett for cacerts + oppretting av brukeren java
@@ -23,7 +23,7 @@ RUN mkdir -p ${APP_DIR} && \
     openssl s_client -connect ${CERTHOST}:${CERTPORT} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${CERTHOST}.cert && \
     keytool -import -noprompt -trustcacerts -alias ${CERTHOST} -file ${CERTHOST}.cert \
         -keystore ${TRUSTSTOREFILE} -storepass ${TRUSTSTOREPASS} && \
-    groupadd -o -g 888 java && useradd -o -r -m -u 888 -g 888 java && \
+    groupadd -o -g 1000 java && useradd -o -r -m -u 1000 -g 1000 java && \
     rm ${CERTHOST}.cert && \
     echo "Importerer CA-sertifikater fra BuyPass og Commfides til cacerts" && \
     for FILE in /tmp/trustcerts/*; do \
