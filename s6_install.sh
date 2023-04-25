@@ -5,9 +5,11 @@
 
 echo "Installerer S6-overlay, v${S6_OVERLAY_VERSION}, for ${TARGETARCH}"
 
-# Endrer på filnavnet dersom arkitekturen er arm64.
+# Endrer på filnavnet etter arkitektur.
 if [ "$TARGETARCH" = "arm64" ]; then
   code="aarch64"
+elif [ "$TARGETARCH" = "amd64" ]; then
+  code="x86_64"
 else
   code=${TARGETARCH}
 fi
