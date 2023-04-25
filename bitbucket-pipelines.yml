@@ -16,8 +16,6 @@ definitions:
   steps:
     - step: &buildImage
         name: 'Bygger DiBK sitt Digdir-integrasjonspunkt'
-        services:
-          - docker
         caches:
           - docker
         script:
@@ -39,22 +37,14 @@ definitions:
           - openssl pkcs12 -export -in vs-auth.pem -out auth.p12 -passout pass:${KEYSTORE_PASS} -name ${KEYSTORE_ALIAS}
           - echo "Finner versjonsnummer på siste versjon av integrasjonspunktet"
           - curl -Lso maven-metadata.xml "https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt/maven-metadata.xml"
-          - IP_VER=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
-          - echo "Bruker versjon $IP_VER"
+          - ip_version=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
+          - echo "Bruker versjon $ip_version av integrasjonspunktet"
+          - curl -L https://depot.dev/install-cli.sh | DEPOT_INSTALL_DIR=/usr/local/bin sh
           - *registryLogin
-          - IMAGE_NAME=${DOCKER_REGISTRY}/app/integrasjonspunkt
-          - docker build . --pull -t ${IMAGE_NAME} --build-arg SERVER_PORT=${SERVER_PORT} --build-arg ALTINN_HOST=${ALTINN_HOST} --build-arg APP_VERSION=${IP_VER} --build-arg profile=${APP_ENV} --build-arg KS_PASS=${KEYSTORE_PASS} --build-arg KS_ALIAS=${KEYSTORE_ALIAS} -f docker/Dockerfile
-          - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_ENV}-${IP_VER}
-          - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_ENV}
-          - docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${IP_VER}
           - if [ "$APP_ENV" = "production" ]; then
-          -   echo "Push av produksjonsversjon"
-          -   docker push ${IMAGE_NAME}
-          -   docker push ${IMAGE_NAME}:${IP_VER}
+          -   depot bake --project ${DEPOT_PID} --push -f docker-bake.hcl production
           - else
-          -   echo "Push av staging-versjon"
-          -   docker push ${IMAGE_NAME}:${APP_ENV}
-          -   docker push ${IMAGE_NAME}:${APP_ENV}-${IP_VER}
+          -   depot bake --project ${DEPOT_PID} --push -f docker-bake.hcl staging
           - fi
 
 pipelines:

@@ -2,22 +2,14 @@ FROM eclipse-temurin:20-jre-alpine
 LABEL no.dibk.description "Docker-image for Digdir integrasjonspunkt, basert på eclipse-temurin"
 LABEL no.dibk.author "Eirik Wulff <ew@dibk.no>"
 
-ENV TERM=xterm DEBIAN_FRONTEND=noninteractive
+ENV TERM=xterm
 
 RUN apk add --no-cache curl tar openssl bash zsh git shadow xz openssh nano ca-certificates
 
-# Installerer s6-overlay
-ARG S6_OVERLAY_VERSION=3.1.4.2
-ARG ARCH=x86_64
-RUN curl -Lo /tmp/s6-overlay-noarch.tar.xz  https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
-    curl -Lo /tmp/s6-overlay-symlinks-noarch.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-symlinks-noarch.tar.xz && \
-    curl -Lo /tmp/s6-overlay-${ARCH}.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${ARCH}.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-${ARCH}.tar.xz && \
-    curl -Lo /tmp/s6-overlay-symlinks-arch.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-arch.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-symlinks-arch.tar.xz && \
-    rm /tmp/*.tar.xz
+# Installerer s6-overlay - https://github.com/just-containers/s6-overlay
+ARG S6_OVERLAY_VERSION="3.1.4.2"
+ADD s6_install.sh /
+RUN echo "ARCH = $TARGETARCH" && /s6_install.sh
 ENTRYPOINT ["/init"]
 
 # Oppsett for cacerts + oppretting av brukeren java
@@ -39,10 +31,10 @@ RUN mkdir -p ${APP_DIR} && \
     done && \
     rm -rf /tmp/trustcerts
 
-ARG APP_VERSION=2.15.0
-ENV APP_VERSION=${APP_VERSION}
+ARG ip_version=2.16.0
+ENV APP_VERSION=${ip_version}
 ARG MAVEN_REPO=https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt
-ADD ${MAVEN_REPO}/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar ${APP_DIR}/app.jar
+RUN curl -Lo ${APP_DIR}/app.jar ${MAVEN_REPO}/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar 
 
 # Oppsett for openssh-server
 ADD docker/sshd_config /etc/ssh/sshd_config
