@@ -5,5 +5,5 @@ cd ${APP_DIR}
 if [ -n "${PORT+set}" ]; then
     export SERVER_PORT=$PORT
 fi
-
+unset JAVA_TOOL_OPTIONS
 exec s6-setuidgid java java ${JAVA_OPTS} -jar app.jar
