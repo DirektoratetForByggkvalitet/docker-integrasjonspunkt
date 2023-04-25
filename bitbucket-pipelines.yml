@@ -41,11 +41,8 @@ definitions:
           - echo "Bruker versjon ${APP_VERSION} av integrasjonspunktet"
           - curl -L https://depot.dev/install-cli.sh | DEPOT_INSTALL_DIR=/usr/local/bin sh
           - *registryLogin
-          - if [ "$APP_ENV" = "production" ]; then
-          -   depot bake --project ${DEPOT_PID} --push -f docker-bake.hcl production
-          - else
-          -   depot bake --project ${DEPOT_PID} --push -f docker-bake.hcl staging
-          - fi
+          - depot bake --project ${DEPOT_PID} --push -f docker-bake.hcl ${APP_ENV}
+
 
 pipelines:
   branches:

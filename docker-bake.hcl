@@ -19,7 +19,7 @@ group "default" {
 }
 
 target "production" {
-  dockerfile = "Dockerfile"
+  dockerfile = "docker/Dockerfile"
   platforms = ["linux/amd64", "linux/arm64"]
   args = {
     APP_VERSION = APP_VERSION
