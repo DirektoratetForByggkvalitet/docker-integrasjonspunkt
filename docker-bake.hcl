@@ -1,5 +1,5 @@
 variable "APP_VERSION" {
-  default = "2.15.0"
+  default = "2.16.0"
 }
 variable "APP_DIR" {
   default = null
