@@ -1,6 +1,3 @@
-variable "APP_VERSION" {
-  default = "2.16.0"
-}
 variable "APP_DIR" {
   default = null
 }
@@ -28,7 +25,6 @@ target "production" {
     "linux/arm64"
   ]
   args = {
-    APP_VERSION = APP_VERSION
     ALTINN_HOST = ALTINN_HOST
     APP_DIR = APP_DIR
     profile = APP_ENV

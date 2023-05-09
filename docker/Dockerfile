@@ -32,9 +32,11 @@ RUN mkdir -p ${APP_DIR} && \
     done && \
     rm -rf /tmp/trustcerts
 
-ARG APP_VERSION=2.16.0
-ENV APP_VERSION=${APP_VERSION}
 ARG MAVEN_REPO=https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt
+RUN curl -Lso /tmp/maven-metadata.xml "${MAVEN_REPO}/maven-metadata.xml" && \
+    export LATEST_VERSION=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat /tmp/maven-metadata.xml) && \
+    rm /tmp/maven-metadata.xml
+ENV APP_VERSION=${LATEST_VERSION}
 RUN curl -Lo ${APP_DIR}/app.jar ${MAVEN_REPO}/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar 
 
 # Oppsett for openssh-server
