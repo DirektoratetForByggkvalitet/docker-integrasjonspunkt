@@ -14,7 +14,7 @@ variable "SERVER_PORT" {
   default = "9093"
 }
 variable "S6_OVERLAY_VERSION" {
-  default = "3.1.4.2"
+  default = null
 }
 
 group "default" {
