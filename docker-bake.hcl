@@ -35,7 +35,10 @@ target "production" {
     SERVER_PORT = SERVER_PORT
     S6_OVERLAY_VERSION = S6_OVERLAY_VERSION
   }
-  tags = ["dibknoe.azurecr.io/app/integrasjonspunkt:latest", "dibknoe.azurecr.io/app/integrasjonspunkt:${APP_VERSION}"]
+  tags = [
+    "dibknoe.azurecr.io/app/integrasjonspunkt:latest", 
+    "dibknoe.azurecr.io/app/integrasjonspunkt:${APP_VERSION}"
+  ]
 }
 
 target "staging" {
