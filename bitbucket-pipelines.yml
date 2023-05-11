@@ -41,7 +41,7 @@ definitions:
           - echo "Bruker versjon ${APP_VERSION} av integrasjonspunktet"
           - if [ "$S6_OVERLAY_VERSION" = "latest" ]; then
           -   export S6_OVERLAY_VERSION=$(curl -s https://api.github.com/repos/just-containers/s6-overlay/tags | jq -r '.[0].name')
-          -   echo "Bruker siste versjon av S6-overlay, ${S6_ver}"
+          -   echo "Bruker siste versjon av S6-overlay, ${S6_OVERLAY_VERSION}"
           - fi
           - curl -L https://depot.dev/install-cli.sh | DEPOT_INSTALL_DIR=/usr/local/bin sh
           - *registryLogin
