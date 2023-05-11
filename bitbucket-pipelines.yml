@@ -38,12 +38,8 @@ definitions:
           - echo "Finner versjonsnummer på siste versjon av integrasjonspunktet"
           - curl -Lso maven-metadata.xml "https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt/maven-metadata.xml"
           - export APP_VERSION=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
-          - envsubst < "docker/motd.sh" > "docker/motd.sh"
           - echo "Bruker versjon ${APP_VERSION} av integrasjonspunktet"
-          - if [ "$S6_OVERLAY_VERSION" = "latest" ]; then
-          -   export S6_OVERLAY_VERSION=$(curl -s https://api.github.com/repos/just-containers/s6-overlay/tags | jq -r '.[0].name')
-          -   echo "Bruker siste versjon av S6-overlay, ${S6_OVERLAY_VERSION}"
-          - fi
+          - envsubst < "docker/motd.sh" > "docker/motd.sh"
           - curl -L https://depot.dev/install-cli.sh | DEPOT_INSTALL_DIR=/usr/local/bin sh
           - *registryLogin
           - depot bake --project ${DEPOT_PID} --push -f docker-bake.hcl ${APP_ENV}
