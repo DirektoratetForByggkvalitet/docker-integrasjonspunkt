@@ -6,4 +6,4 @@ if [ -n "${PORT+set}" ]; then
     export SERVER_PORT=$PORT
 fi
 unset JAVA_TOOL_OPTIONS
-exec s6-setuidgid www-data java ${JAVA_OPTS} -jar app.jar --debug
+exec java ${JAVA_OPTS} -jar app.jar
