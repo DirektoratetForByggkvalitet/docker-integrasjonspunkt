@@ -1,9 +1,9 @@
 #!/command/with-contenv bash
 
 cd ${APP_DIR}
-# Korrigerer integrasjonspunktets port dersom porten endres i Azure Web App
+# Korrigerer integrasjonspunktets port dersom porten endres i Azure Web App-konfig
 if [ -n "${PORT+set}" ]; then
     export SERVER_PORT=$PORT
 fi
 unset JAVA_TOOL_OPTIONS
-exec s6-setuidgid java java ${JAVA_OPTS} -jar app.jar
+exec s6-setuidgid www-data java ${JAVA_OPTS} -jar app.jar

@@ -24,7 +24,6 @@ RUN mkdir -p ${APP_DIR} && \
     openssl s_client -connect ${CERTHOST}:${CERTPORT} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${CERTHOST}.cert && \
     keytool -import -noprompt -trustcacerts -alias ${CERTHOST} -file ${CERTHOST}.cert \
         -keystore ${TRUSTSTOREFILE} -storepass ${TRUSTSTOREPASS} && \
-    groupadd -o -g 1000 java && useradd -o -r -m -u 1000 -g 1000 java && \
     rm ${CERTHOST}.cert && \
     echo "Importerer CA-sertifikater fra BuyPass og Commfides til cacerts" && \
     for FILE in /tmp/trustcerts/*; do \
@@ -54,7 +53,7 @@ ARG KS_ALIAS=dibk
 ADD auth.p12 ${APP_DIR}/auth.p12
 
 # Opprydding
-RUN chown -R java:java ${APP_DIR} && \
+RUN chown -R www-data:www-data ${APP_DIR} && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     echo "" > /etc/motd
 
