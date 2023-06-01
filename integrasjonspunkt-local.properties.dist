@@ -26,7 +26,7 @@ difi.move.dpv.password=${DPV_PASSWORD}
 # Autentisering (HTTP Basic Auth)
 difi.security.enable=${AUTH_ENABLE}
 difi.security.user.name=${AUTH_USERNAME}
-dif.security.user.password=${AUTH_PASSWORD}
+difi.security.user.password=${AUTH_PASSWORD}
 
 # Database-oppsett
 difi.datasource.url=${DB_URL}
