@@ -10,6 +10,11 @@ difi.move.org.keystore.password=${KEYSTORE_PASS}
 difi.move.org.keystore.path=${KEYSTORE_PATH}
 difi.move.org.keystore.type=${KEYSTORE_TYPE}
 
+# eFormidlings meldingstjeneste (DPO)
+difi.move.feature.enableDPO=${DPO_ENABLE}
+difi.move.dpo.username=${DPO_USERNAME}
+difi.move.dpo.password=${DPO_PASSWORD}
+
 # eInnsyn - DIFI_MOVE_FEATURE_ENABLE_DPE
 difi.move.feature.enableDPE=${DPE_ENABLE}
 
