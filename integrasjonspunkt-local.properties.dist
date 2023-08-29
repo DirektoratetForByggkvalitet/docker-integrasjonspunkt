@@ -47,11 +47,11 @@ difi.activemq.broker-url=vm://localhost
 ##----------------------
 difi.move.feature.enableDPF=${DPF_ENABLE}
 
-## SvarInn (mottaker)
+## SvarUt Mottak
 difi.move.fiks.inn.username=${SVARINN_USER}
 difi.move.fiks.inn.password=${SVARINN_PASSWORD}
 
-## SvarUt (avsender)
+## SvarUt Avsender
 difi.move.fiks.ut.username=${SVARUT_USER}
 difi.move.fiks.ut.password=${SVARUT_PASSWORD}
 
