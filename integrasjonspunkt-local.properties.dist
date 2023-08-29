@@ -63,4 +63,6 @@ difi.move.mail.senderAddress=${MAIL_FROM}
 difi.move.mail.properties.mail.smtp.starttls=${MAIL_TLS}
 difi.move.fiks.inn.mailOnError=${MAIL_ONERROR}
 difi.move.mail.enableAuth=${MAIL_AUTH}
+difi.move.mail.username=${MAIL_USER}
+difi.move.mail.password=${MAIL_PASSWORD}
 difi.move.mail.trust=${difi.move.mail.smtpHost}
