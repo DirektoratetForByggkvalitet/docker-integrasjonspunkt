@@ -26,9 +26,9 @@ definitions:
           - docker
         script:
           - *createCert
+          - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
           - envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
           - echo "Laster ned Virksomhetssertifikat"
-          - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
           - az login --service-principal --username ${AZURE_SP_ID} --password sp-auth.cert --tenant ${AZURE_TENANT_ID}
           - az keyvault secret download --encoding base64 --file vs-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
           # - pipe: microsoft/azure-cli-run:1.1.0
