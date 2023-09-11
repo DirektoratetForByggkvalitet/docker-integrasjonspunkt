@@ -57,7 +57,7 @@ RUN chown -R www-data:www-data ${APP_DIR} && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     echo "" > /etc/motd
 
-EXPOSE 2222 ${SERVER_PORT}
+EXPOSE ${SSH_PORT} ${SERVER_PORT}
 # HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:9093/manage/health || exit 1
 WORKDIR ${APP_DIR}
 ARG profile=staging
