@@ -51,8 +51,7 @@ definitions:
               AZURE_APP_ID: $AZURE_SP_ID
               AZURE_PASSWORD: sp-auth.cert
               AZURE_TENANT_ID: $AZURE_TENANT_ID
-              CLI_COMMAND: az acr login --name ${DOCKER_REGISTRY} --expose-token --output json | tee config.json
-          - mv config.json ${HOME}/.docker/config.json
+              CLI_COMMAND: 'az acr login --name ${DOCKER_REGISTRY}'
           - docker pull dibknoe.azurecr.io/php:latest
           - depot bake --project ${DEPOT_PID} --push -f docker-bake.hcl ${APP_ENV}
 
