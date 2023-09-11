@@ -58,5 +58,16 @@ pipelines:
           <<: *buildImage
           name: 'Bygger integrasjonspunkt for produksjon'
           deployment: Production
-          
-
+    
+    test-sp-cert:
+      - step:
+          name: Tester å bruke sertifikat som innlogging
+          deployment: Staging
+          script:
+          - echo ${AZURE_SP_AUTH} > dibk-sp-auth.cert
+          - pipe: microsoft/azure-cli-run:1.1.0
+            variables:
+              AZURE_APP_ID: $AZURE_SP_ID
+              AZURE_PASSWORD: ./dibk-sp-auth.cert
+              AZURE_TENANT_ID: $AZURE_TENANT_ID
+              CLI_COMMAND: az keyvault secret download --encoding base64 --file vs-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
