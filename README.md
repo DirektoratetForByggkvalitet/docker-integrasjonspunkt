@@ -41,17 +41,12 @@ Litt om miljøvariablene i Bitbucket
 | Variabelnavn | Beskrivelse | Standardverdi |
 | ----- | ----- | ----- |
 | APP_ENV | Miljøet appen skal knyttes seg mot, production eller staging | production |
-| SERVER_PORT | Porten integrasjonspunktet skal benytte. Siden integrasjonspunktet ikke kjører som root må dette være en ikke-priviligert port. Kan overstyres av WEBSITES_PORT i Web App-oppsettet | 9093 |
+| SERVER_PORT | Porten integrasjonspunktet skal benytte. Siden integrasjonspunktet ikke kjører som root må dette være en ikke-priviligert port.  Kan overstyres av WEBSITES_PORT i Web App-oppsettet. Porten eksponeres aldri mot Internett når integrasjonspunktet kjøres som en Web App. | 9093 |
 | ORG_NR | Organisasjonsnummeret til DiBK (organisasjonen som eier virksomhetssertifikatet) | 974760223 |
 | KEYSTORE_PATH | URL til keystore-fila som har virksomhetssertifikatet | file:auth.p12 |
 | KEYSTORE_TYPE | Type keystore-fil | PKCS12 |
 | KEYSTORE_ALIAS | Friendly-name eller alias til sertfikatet i keystore-fila | dibk |
 | KEYSTORE_PASS | Passordet som settes til keystore og sertifikat, blir satt under bygging | |
-| DPI_ENABLE | Slår på eller av funksjonaliteten Digital Post for Innbyggere (DigiPost o.l.) | false |
-| DPE_ENABLE | Slår på eller av funksjonalitet mot eInnsyn | true |
-| DPV_ENABLE | Slår på eller av funksjonalitet mot Digital Post til Virksomheter (via Altinn) | true |
-| DPV_USERNAME | Brukernavn for DPV | dibk |
-| DPV_PASSWORD | Passord for DPV | |
 | AUTH_ENABLE | Slår på eller av autentisering av bruker | false |
 | AUTH_USERNAME | Brukernavn for autentisering | |
 | AUTH_PASSWORD | Passord for autentisering | |
@@ -59,6 +54,20 @@ Litt om miljøvariablene i Bitbucket
 | DB_USERNAME | Brukernavn for databasen | |
 | DB_PASSWORD | Passord for databasen | |
 | ALTINN_HOST | Navn på tjeneren som brukes til kommunikasjon med Altinn | altinn.no |
+| DPI_ENABLE | Slår på eller av funksjonaliteten Digital Post for Innbyggere (DigiPost o.l.) | false |
+| DPE_ENABLE | Slår på eller av funksjonalitet mot eInnsyn | true |
+| DPV_ENABLE | Slår på eller av funksjonalitet mot Digital Post til Virksomheter (via Altinn) | true |
+| DPV_USERNAME | Brukernavn for DPV | dibk |
+| DPV_PASSWORD | Passord for DPV | |
+| DPO_ENABLE | Slår på Altinn Digital Post for offentlige | false |
+| DPO_USERNAME | Brukernavn fra Altinn | |
+| DPO_PASSWORD | Brukernavn fra Altinn | |
+| DPF_ENABLE | Slår på funksjonalitet mot SvarUt | false |
+| SVARUT_USER | Bruker for å sende meldinger til SvarUt. Settes opp som avsendersystem i svarut.ks.no | |
+| SVARUT_PASSWORD | Passord for sending av SvarUt-meldinger | |
+| SVARINN_USER | Bruker for å motta meldinger fra SvarUt. Settes opp som mottakersystem i Svarut.ks.no | |
+| SVARINN_PASSWORD | Passord for mottak av meldinger fra SvarUt |
+
 
 ## Avhengigheter ##
 
