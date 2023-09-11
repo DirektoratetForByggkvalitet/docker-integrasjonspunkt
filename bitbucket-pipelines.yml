@@ -7,8 +7,9 @@
 # AZURE_SP_SECRET Secret for Azure SP
 # AZURE_TENANT_ID Tenant-ID for Service Principal i Azure
 
-# image: atlassian/default-image:4 # Uses Atlassian's default image as default
-image: mcr.microsoft.com/azure-cli:latest
+image: atlassian/default-image:4 # Uses Atlassian's default image as default
+
+# image: mcr.microsoft.com/azure-cli:latest
 
 definitions:
   scripts:
@@ -27,6 +28,8 @@ definitions:
           - *createCert
           - envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
           - echo "Laster ned Virksomhetssertifikat"
+          - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+          - az login --service-principal --username $AZURE_SP_ID --password sp-auth.cert
           - az keyvault secret download --encoding base64 --file vs-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
           # - pipe: microsoft/azure-cli-run:1.1.0
           #   variables:
@@ -47,8 +50,8 @@ definitions:
           - export APP_VERSION=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
           - echo "Bruker versjon ${APP_VERSION} av integrasjonspunktet"
           - envsubst < "docker/motd.template" > "docker/motd.sh"
-          - curl -L https://depot.dev/install-cli.sh | DEPOT_INSTALL_DIR=/usr/local/bin sh
           - az acr login --name ${DOCKER_REGISTRY}
+          - curl -L https://depot.dev/install-cli.sh | DEPOT_INSTALL_DIR=/usr/local/bin sh
           - docker pull dibknoe.azurecr.io/php:latest
           - depot bake --project ${DEPOT_PID} --push -f docker-bake.hcl ${APP_ENV}
 
