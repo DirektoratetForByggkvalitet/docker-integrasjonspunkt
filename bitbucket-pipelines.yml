@@ -7,7 +7,7 @@
 # AZURE_SP_SECRET Secret for Azure SP
 # AZURE_TENANT_ID Tenant-ID for Service Principal i Azure
 
-image: atlassian/default-image:3 # Uses Atlassian's default image as default
+image: atlassian/default-image:4 # Uses Atlassian's default image as default
 
 definitions:
   scripts:
@@ -19,6 +19,8 @@ definitions:
     - step: &buildImage
         name: 'Bygger DiBK sitt Digdir-integrasjonspunkt'
         caches:
+          - docker
+        services:
           - docker
         script:
           - *createCert
@@ -49,7 +51,8 @@ definitions:
               AZURE_APP_ID: $AZURE_SP_ID
               AZURE_PASSWORD: sp-auth.cert
               AZURE_TENANT_ID: $AZURE_TENANT_ID
-              CLI_COMMAND: az acr login --name ${DOCKER_REGISTRY}
+              CLI_COMMAND: JSON=$(az acr login --name ${DOCKER_REGISTRY} --output json)
+          - echo ${JSON} > ${HOME}/.docker/config.json
           - depot bake --project ${DEPOT_PID} --push -f docker-bake.hcl ${APP_ENV}
 
 
