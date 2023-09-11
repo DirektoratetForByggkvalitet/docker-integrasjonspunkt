@@ -52,7 +52,6 @@ definitions:
           - envsubst < "docker/motd.template" > "docker/motd.sh"
           - az acr login --name ${DOCKER_REGISTRY}
           - curl -L https://depot.dev/install-cli.sh | DEPOT_INSTALL_DIR=/usr/local/bin sh
-          - docker pull dibknoe.azurecr.io/php:latest
           - depot bake --project ${DEPOT_PID} --push -f docker-bake.hcl ${APP_ENV}
 
 
