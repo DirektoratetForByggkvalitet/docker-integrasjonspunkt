@@ -21,12 +21,13 @@ definitions:
         caches:
           - docker
         script:
+          - *createCert
           - envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
           - echo "Laster ned Virksomhetssertifikat"
           - pipe: microsoft/azure-cli-run:1.1.0
             variables:
               AZURE_APP_ID: $AZURE_SP_ID
-              AZURE_PASSWORD: $AZURE_SP_SECRET
+              AZURE_PASSWORD: sp-auth.cert
               AZURE_TENANT_ID: $AZURE_TENANT_ID
               CLI_COMMAND: az keyvault secret download --encoding base64 --file vs-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
           - echo "Laster ned CA-sertifikater fra BuyPass og Commfides"
@@ -43,7 +44,12 @@ definitions:
           - echo "Bruker versjon ${APP_VERSION} av integrasjonspunktet"
           - envsubst < "docker/motd.template" > "docker/motd.sh"
           - curl -L https://depot.dev/install-cli.sh | DEPOT_INSTALL_DIR=/usr/local/bin sh
-          - *registryLogin
+          - pipe: microsoft/azure-cli-run:1.1.0
+            variables:
+              AZURE_APP_ID: $AZURE_SP_ID
+              AZURE_PASSWORD: sp-auth.cert
+              AZURE_TENANT_ID: $AZURE_TENANT_ID
+              CLI_COMMAND: az acr login --name ${DOCKER_REGISTRY}
           - depot bake --project ${DEPOT_PID} --push -f docker-bake.hcl ${APP_ENV}
 
 
@@ -60,16 +66,3 @@ pipelines:
           <<: *buildImage
           name: 'Bygger integrasjonspunkt for produksjon'
           deployment: Production
-    
-    test-sp-cert:
-      - step:
-          name: Tester å bruke sertifikat som innlogging
-          deployment: Staging
-          script:
-          - *createCert
-          - pipe: microsoft/azure-cli-run:1.1.0
-            variables:
-              AZURE_APP_ID: $AZURE_SP_ID
-              AZURE_PASSWORD: sp-auth.cert
-              AZURE_TENANT_ID: $AZURE_TENANT_ID
-              CLI_COMMAND: az acr login --name dibknoe
