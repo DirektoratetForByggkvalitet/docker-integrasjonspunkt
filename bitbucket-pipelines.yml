@@ -7,36 +7,33 @@
 # AZURE_SP_SECRET Secret for Azure SP
 # AZURE_TENANT_ID Tenant-ID for Service Principal i Azure
 
-image: atlassian/default-image:4 # Uses Atlassian's default image as default
-
-# image: mcr.microsoft.com/azure-cli:latest
+image: atlassian/default-image:3 # Uses Atlassian's default image as default
 
 definitions:
+  services:
+    docker:
+      image: docker:dind
+
   scripts:
     - script: &registryLogin
         echo ${AZURE_SP_SECRET} | docker login --username ${AZURE_SP_ID} --password-stdin ${DOCKER_REGISTRY}
-    - script: &createCert
-        echo -e "-----BEGIN PRIVATE KEY-----\n${AZURE_SP_CERT_KEY}\n-----END PRIVATE KEY-----\n-----BEGIN CERTIFICATE-----\n${AZURE_SP_CERT}\n-----END CERTIFICATE-----\n" > sp-auth.cert
   steps:
     - step: &buildImage
         name: 'Bygger DiBK sitt Digdir-integrasjonspunkt'
         caches:
           - docker
-        services:
-          - docker
+        runs-on:
+          - self.hosted
+          - linux
         script:
-          - *createCert
-          - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
           - envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
           - echo "Laster ned Virksomhetssertifikat"
-          - az login --service-principal --username ${AZURE_SP_ID} --password sp-auth.cert --tenant ${AZURE_TENANT_ID}
-          - az keyvault secret download --encoding base64 --file vs-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
-          # - pipe: microsoft/azure-cli-run:1.1.0
-          #   variables:
-          #     AZURE_APP_ID: $AZURE_SP_ID
-          #     AZURE_PASSWORD: sp-auth.cert
-          #     AZURE_TENANT_ID: $AZURE_TENANT_ID
-          #     CLI_COMMAND: az keyvault secret download --encoding base64 --file vs-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
+          - pipe: microsoft/azure-cli-run:1.1.0
+            variables:
+              AZURE_APP_ID: $AZURE_SP_ID
+              AZURE_PASSWORD: $AZURE_SP_SECRET
+              AZURE_TENANT_ID: $AZURE_TENANT_ID
+              CLI_COMMAND: az keyvault secret download --encoding base64 --file vs-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
           - echo "Laster ned CA-sertifikater fra BuyPass og Commfides"
           - mkdir -p docker/trustcerts
           - curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/BPClass3RootCA.cer"
@@ -50,10 +47,14 @@ definitions:
           - export APP_VERSION=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
           - echo "Bruker versjon ${APP_VERSION} av integrasjonspunktet"
           - envsubst < "docker/motd.template" > "docker/motd.sh"
-          - az acr login --name ${DOCKER_REGISTRY}
-          - curl -L https://depot.dev/install-cli.sh | DEPOT_INSTALL_DIR=/usr/local/bin sh
-          - depot bake --project ${DEPOT_PID} --push -f docker-bake.hcl ${APP_ENV}
-
+          - *registryLogin
+          - export myArch=$(uname -m)
+          - if [ "$myArch" = "x86_64" ]; then export myArch="amd64"; fi
+          - curl -fsSLO https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-${myArch}
+          - mkdir -p $HOME/.docker/cli-plugins/ && mv buildx-v${BUILDX_VERSION}.linux-amd64 $HOME/.docker/cli-plugins/docker-buildx && chmod +x ~/.docker/cli-plugins/docker-buildx # download buildx and move it to the docker plugin folder
+          - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          - docker buildx create --name bob-the-builder --use
+          - docker buildx bake --pull --push --file docker-bake.hcl ${APP_ENV}  
 
 pipelines:
   branches:
@@ -68,3 +69,5 @@ pipelines:
           <<: *buildImage
           name: 'Bygger integrasjonspunkt for produksjon'
           deployment: Production
+          
+
