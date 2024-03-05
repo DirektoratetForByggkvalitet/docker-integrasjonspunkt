@@ -66,6 +66,7 @@ definitions:
           - echo "Laster ned Virksomhetssertifikat"
           - az login --service-principal -u $AZURE_SP_ID -p $AZURE_SP_SECRET --tenant $AZURE_TENANT_ID
           - az keyvault secret download --encoding base64 --file vs-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
+          - az acr login --name dibknoe
           - echo "Laster ned CA-sertifikater fra BuyPass og Commfides"
           - mkdir -p docker/trustcerts
           - curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/BPClass3RootCA.cer"
@@ -80,7 +81,6 @@ definitions:
           - echo "Bruker versjon ${APP_VERSION} av integrasjonspunktet"
           - envsubst < "docker/motd.template" > "docker/motd.sh"
           - unset DOCKER_HOST
-          - *registryLogin
           - docker buildx bake --push --file docker-bake.hcl ${APP_ENV}
           - docker system prune -fa
 pipelines:
