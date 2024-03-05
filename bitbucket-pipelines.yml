@@ -81,7 +81,7 @@ definitions:
           - envsubst < "docker/motd.template" > "docker/motd.sh"
           - unset DOCKER_HOST
           - *registryLogin
-          - docker buildx bake --pull --push --file docker-bake.hcl ${APP_ENV}
+          - docker buildx bake --push --file docker-bake.hcl ${APP_ENV}
           - docker system prune -fa
 pipelines:
   branches:
