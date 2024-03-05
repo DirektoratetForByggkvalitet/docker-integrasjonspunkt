@@ -62,6 +62,7 @@ definitions:
           - macos
           - applesilicon
         script:
+          - unset DOCKER_HOST
           - envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
           - echo "Laster ned Virksomhetssertifikat"
           - az login --service-principal -u $AZURE_SP_ID -p $AZURE_SP_SECRET --tenant $AZURE_TENANT_ID
@@ -80,7 +81,6 @@ definitions:
           - export APP_VERSION=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
           - echo "Bruker versjon ${APP_VERSION} av integrasjonspunktet"
           - envsubst < "docker/motd.template" > "docker/motd.sh"
-          - unset DOCKER_HOST
           - docker buildx bake --push --file docker-bake.hcl ${APP_ENV}
           - docker system prune -fa
 pipelines:
