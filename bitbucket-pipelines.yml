@@ -65,6 +65,7 @@ definitions:
           - envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
           - echo "Laster ned Virksomhetssertifikat"
           - envsubst < "azure-sp-auth.dist" > "azure-sp-auth.pem"
+          - cat azure-sp-auth.pem
           - az login --service-principal -u $AZURE_SP_ID -p azure-sp-auth.pem --tenant $AZURE_TENANT_ID
           - az keyvault secret download --encoding base64 --file vs-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
           - az acr login --name dibknoe
