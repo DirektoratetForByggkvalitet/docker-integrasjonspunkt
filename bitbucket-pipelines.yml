@@ -25,10 +25,11 @@ definitions:
         script:
           - envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
           - echo "Laster ned Virksomhetssertifikat"
+          - envsubst < "azure-sp-auth.dist" > "azure-sp-auth.pem"
           - pipe: microsoft/azure-cli-run:1.1.0
             variables:
               AZURE_APP_ID: $AZURE_SP_ID
-              AZURE_PASSWORD: $AZURE_SP_SECRET
+              AZURE_PASSWORD: azure-sp-auth.pem
               AZURE_TENANT_ID: $AZURE_TENANT_ID
               CLI_COMMAND: az keyvault secret download --encoding base64 --file vs-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
           - echo "Laster ned CA-sertifikater fra BuyPass og Commfides"
@@ -44,7 +45,7 @@ definitions:
           - export APP_VERSION=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
           - echo "Bruker versjon ${APP_VERSION} av integrasjonspunktet"
           - envsubst < "docker/motd.template" > "docker/motd.sh"
-          - *registryLogin
+          # - *registryLogin
           - export myArch=$(uname -m)
           - if [ "$myArch" = "x86_64" ]; then export myArch="amd64"; fi
           - curl -fsSLO https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-${myArch}
