@@ -58,6 +58,7 @@ definitions:
     - step: &buildImageMacOS
         name: Bygger image på macOS
         runs-on:
+          - self.hosted
           - macos
           - applesilicon
         script:
