@@ -82,7 +82,6 @@ definitions:
           - echo "Bruker versjon ${APP_VERSION} av integrasjonspunktet"
           - envsubst < "docker/motd.template" > "docker/motd.sh"
           - docker buildx bake --push --file docker-bake.hcl ${APP_ENV}
-          - docker system prune -fa
 pipelines:
   branches:
     master:

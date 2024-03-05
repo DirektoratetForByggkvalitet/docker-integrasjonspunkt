@@ -33,7 +33,7 @@ RUN mkdir -p ${APP_DIR} && \
 ARG APP_VERSION
 ENV APP_VERSION=${APP_VERSION}
 ARG MAVEN_REPO=https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt
-RUN curl -Lo ${APP_DIR}/app.jar ${MAVEN_REPO}/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar 
+RUN curl -Lso ${APP_DIR}/app.jar ${MAVEN_REPO}/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar 
 
 # Oppsett for openssh-server
 ADD docker/sshd_config /etc/ssh/sshd_config
