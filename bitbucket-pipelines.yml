@@ -64,12 +64,8 @@ definitions:
         script:
           - envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
           - echo "Laster ned Virksomhetssertifikat"
-          - pipe: microsoft/azure-cli-run:1.1.0
-            variables:
-              AZURE_APP_ID: $AZURE_SP_ID
-              AZURE_PASSWORD: $AZURE_SP_SECRET
-              AZURE_TENANT_ID: $AZURE_TENANT_ID
-              CLI_COMMAND: az keyvault secret download --encoding base64 --file vs-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
+          - az login --service-principal -u $AZURE_SP_ID -p $AZURE_SP_SECRET --tenant $AZURE_TENANT_ID
+          - az keyvault secret download --encoding base64 --file vs-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
           - echo "Laster ned CA-sertifikater fra BuyPass og Commfides"
           - mkdir -p docker/trustcerts
           - curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/BPClass3RootCA.cer"
