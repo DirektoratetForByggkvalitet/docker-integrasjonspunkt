@@ -9,9 +9,8 @@ RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates cu
 # Installerer s6-overlay - https://github.com/just-containers/s6-overlay
 ARG S6_OVERLAY_VERSION
 ARG TARGETARCH
-ADD s6_install.sh /
+ADD --chmod=0755 s6_install.sh /
 RUN /s6_install.sh
-ENV S6_OVERLAY_VERSION=${S6_OVERLAY_VERSION}
 ENTRYPOINT ["/init"]
 
 # Oppsett for cacerts + oppretting av brukeren java
