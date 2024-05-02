@@ -62,9 +62,9 @@ definitions:
           - applesilicon
         script:
           - unset DOCKER_HOST
-          - security -v unlock-keychain -p ${KEYCHAIN_PASS} ~/Library/Keychains/login.keychain-db
           - envsubst < "azure-sp-auth.dist" > "azure-sp-auth.pem"
           - az login --service-principal -u ${AZURE_SP_ID} -p azure-sp-auth.pem --tenant ${AZURE_TENANT_ID}
+          - security -v unlock-keychain -p ${KEYCHAIN_PASS} ~/Library/Keychains/login.keychain-db
           - az acr login --name ${DOCKER_REGISTRY%%.*}
           - echo "Laster ned Virksomhetssertifikat"
           - az keyvault secret download --encoding base64 --file vs-auth.p12 --name ${AZURE_KV_CERT_NAME} --vault-name ${AZURE_KV_NAME}
