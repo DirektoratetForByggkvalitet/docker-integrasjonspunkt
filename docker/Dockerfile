@@ -7,7 +7,7 @@ ENV TERM=xterm DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates curl openssl xz-utils
 
 # Installerer s6-overlay - https://github.com/just-containers/s6-overlay
-ARG S6_OVERLAY_VERSION
+ARG S6_OVERLAY_VERSION="3.2.0.0"
 ADD https://github.com/DirektoratetForByggkvalitet/s6-overlay-installer.git /s6-overlay-installer
 RUN /s6-overlay-installer/s6_install.sh && rm -rf /s6-overlay-installer
 ENTRYPOINT ["/init"]
@@ -15,10 +15,11 @@ ENTRYPOINT ["/init"]
 # Oppsett for cacerts + oppretting av brukeren java
 ARG APP_DIR=/app/integrasjonspunkt
 ARG ALTINN_HOST=altinn.no
-ENV APP_DIR=${APP_DIR} CERTHOST=${ALTINN_HOST} CERTPORT=443 TRUSTSTOREFILE=${JAVA_HOME}/lib/security/cacerts TRUSTSTOREPASS=changeit
+ENV APP_DIR=${APP_DIR} CERTHOST=${ALTINN_HOST}
 # Legger til CA-sertifikater fra BuyPass og Commfides
 ADD docker/trustcerts /tmp/trustcerts
 RUN mkdir -p ${APP_DIR} && \
+    export CERTPORT=443 TRUSTSTOREFILE=${JAVA_HOME}/lib/security/cacerts TRUSTSTOREPASS=changeit && \
     openssl s_client -connect ${CERTHOST}:${CERTPORT} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${CERTHOST}.cert && \
     keytool -import -noprompt -trustcacerts -alias ${CERTHOST} -file ${CERTHOST}.cert \
         -keystore ${TRUSTSTOREFILE} -storepass ${TRUSTSTOREPASS} && \
@@ -46,8 +47,6 @@ RUN chmod -R 644 /etc/s6-overlay/s6-rc.d/* && chmod -R a+rX /etc/s6-overlay/s6-r
 ARG SERVER_PORT=9093
 ENV SERVER_PORT=${SERVER_PORT} SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.properties
-ARG KS_PASS
-ARG KS_ALIAS=dibk
 ADD auth.p12 ${APP_DIR}/auth.p12
 
 # Opprydding

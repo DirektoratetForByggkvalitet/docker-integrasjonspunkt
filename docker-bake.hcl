@@ -17,6 +17,8 @@ variable "S6_OVERLAY_VERSION" {
   default = null
 }
 
+variable "SHA" {}
+
 group "default" {
   targets = ["staging"]
 }
@@ -37,13 +39,14 @@ target "production" {
   }
   tags = [
     "dibknoe.azurecr.io/app/integrasjonspunkt:latest", 
-    "dibknoe.azurecr.io/app/integrasjonspunkt:${APP_VERSION}"
+    "dibknoe.azurecr.io/app/integrasjonspunkt:${APP_VERSION}",
+    "${ACR}${ACRPATH}:${SHA}
   ]
 }
 
 target "staging" {
   inherits = ["production"]
-  tags = ["dibknoe.azurecr.io/app/integrasjonspunkt:${APP_ENV}", "dibknoe.azurecr.io/app/integrasjonspunkt:${APP_ENV}-${APP_VERSION}"]
+  tags = ["dibknoe.azurecr.io/app/integrasjonspunkt:${APP_ENV}", "dibknoe.azurecr.io/app/integrasjonspunkt:${SHA}"]
 }
 
 

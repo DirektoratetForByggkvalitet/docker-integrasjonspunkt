@@ -11,6 +11,8 @@ on:
 
 env:
   acrPath: app/integrasjonspunkt
+  appDir: /app/integrasjonspunkt
+  s6version: '3.2.0.0'
 
 jobs:
   build:
@@ -29,13 +31,82 @@ jobs:
         registry: https://${{ vars.ACR }}/
         username: ${{ secrets.AzureAppService_ContainerUsername_d17a460f781b44b0a1f6269b5e630137 }}
         password: ${{ secrets.AzureAppService_ContainerPassword_0f7bf61684fc4cec8f9ba8f0feed7389 }}
+    - name: Azure CLI login
+      run: |
+        echo "${{ secrets.AZURE_SP_CERT }}" > sp.cert
+        az login --service-principal -u ${{ vars.AZURE_SP_ID }} -p ./sp.cert --tenant ${{ vars.AZURE_TENANT_ID }}
+    - name: Henter virksomhetssertifikat fra Key Vault og setter passord på det
+      run: |
+        az keyvault secret download --encoding base64 --name ${{ vars.AZURE_KV_CERT_NAME }} --file vs.p12 --vault-name ${{ vars.KEYVAULT_NAME }}
+        empty=
+        openssl pkcs12 -in vs.p12 -passin pass:$empty -nodes -out vs-auth.pem
+        openssl pkcs12 -export -in vs-auth.pem -out auth.p12 -passout pass:${KEYSTORE_PASS} -name ${KEYSTORE_ALIAS}
+        rm vs-auth.pem vs.p12
 
-    - name: Build and push
+    - name: Henter inn integrasjonspunktets versjon
+      id: getVersion
+      run: |
+        curl -Lso maven-metadata.xml "https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt/maven-metadata.xml"
+        echo "appVersion=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)" >> $GITHUB_OUTPUT
+
+    - name: Henter inn CA-sertifikater
+      run: |
+        mkdir -p docker/trustcerts
+        curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/BPClass3RootCA.cer"
+        curl -Lso docker/trustcerts/CommfidesClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/cpn%20rootca%20sha256%20class%203.crt"
+
+    - name: Befolker properties-fila
+      env:
+        APP_VERSION: ${{steps.getVersion.outputs.appVersion}}
+        APP_ENV: ${{vars.APP_ENV}}
+        SERVER_PORT: ${{vars.SERVER_PORT}}
+        ORG_NR: ${{vars.ORG_NR}}
+        KEYSTORE_ALIAS: ${{vars.KEYSTORE_ALIAS}}
+        KEYSTORE_PASS: ${{secrets.KEYSTORE_PASS}}
+        KEYSTORE_PATH: ${{vars.KEYSTORE_PATH}}
+        KEYSTORE_TYPE: ${{vars.KEYSTORE_TYPE}}
+        DPO_ENABLE: ${{vars.DPO_ENABLE}}
+        DPO_USERNAME: ${{vars.DPO_USERNAME}}
+        DPO_PASSWORD: ${{secrets.DPO_PASSWORD}}
+        DPE_ENABLE: ${{vars.DPE_ENABLE}}
+        DPI_ENABLE: ${{vars.DPI_ENABLE}}
+        DPV_ENABLE: ${{vars.DPV_ENABLE}}
+        DPV_USERNAME: ${{vars.DPV_USERNAME}}
+        DPV_PASSWORD: ${{secrets.DPV_PASSWORD}}
+        AUTH_ENABLE: ${{vars.AUTH_ENABLE}}
+        AUTH_USERNAME: ${{vars.AUTH_USERNAME}}
+        AUTH_PASSWORD: ${{secrets.AUTH_PASSWORD}}
+        DB_URL: ${{vars.DB_URL}}
+        DB_USERNAME: ${{vars.DB_USERNAME}}
+        DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+        DPF_ENABLE: ${{vars.DPF_ENABLE}}
+        SVARINN_USER: ${{vars.SVARINN_USER}}
+        SVARUT_USER: ${{vars.SVARUT_USER}}
+        SVARINN_PASSWORD: ${{secrets.SVARINN_PASSWORD}}
+        SVARUT_PASSWORD: ${{secrets.SVARUT_PASSWORD}}
+        MAIL_HOST: ${{vars.MAIL_HOST}}
+        MAIL_PORT: ${{vars.MAIL_PORT}}
+        MAIL_TO: ${{vars.MAIL_TO}}
+        MAIL_FROM: ${{vars.MAIL_FROM}}
+        MAIL_TLS: ${{vars.MAIL_TLS}}
+        MAIL_ONERROR: ${{vars.MAIL_ONERROR}}
+        MAIL_AUTH: ${{vars.MAIL_AUTH}}
+        MAIL_USER: ${{vars.MAIL_USER}}
+        MAIL_PASSWORD: ${{secrets.MAIL_PASSWORD}}
+      run: |
+        envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
+        envsubst < "docker/motd.template" > "docker/motd.sh"
+
+    - name: Bygger og publiserer image
       uses: docker/bake-action@v5
       env:
+        APP_ENV: ${{vars.APP_ENV}}
+        APP_VERSION: ${{steps.getVersion.outputs.appVersion}}
+        S6_OVERLAY_VERSION: ${{env.s6version}}
         ACR: ${{ vars.ACR }}
         ACRPATH: ${{ env.acrPath }}
         SHA: ${{ github.sha }}
+        APP_DIR: ${{env.appDir}}
       with:
         files: 'docker/docker-bake.hcl'
         push: true
