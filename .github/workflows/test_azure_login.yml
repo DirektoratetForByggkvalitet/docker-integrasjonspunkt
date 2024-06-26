@@ -11,7 +11,7 @@ jobs:
             - name: Azure CLI login
               run: |
                 echo "${{ secrets.AZURE_SP_CERT }}" > sp.cert
-                az login --service-principal --name ${{ vars.AZURE_SP_ID }} --password ./sp.cert --tenant-id ${{ vars.AZURE_TENANT_ID }}
+                az login --service-principal -u ${{ vars.AZURE_SP_ID }} -p ./sp.cert --tenant-id ${{ vars.AZURE_TENANT_ID }}
             - name: Henter virksomhetssertifikat fra Key Vault
               run: |
                 az keyvault secret download --name ${{ vars.AZURE_KV_CERT_NAME }} --encoding base64 --file vs.p12 --keyvault-name dibk-kv-norway
