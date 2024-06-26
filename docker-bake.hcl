@@ -40,7 +40,7 @@ target "production" {
   tags = [
     "dibknoe.azurecr.io/app/integrasjonspunkt:latest", 
     "dibknoe.azurecr.io/app/integrasjonspunkt:${APP_VERSION}",
-    "${ACR}${ACRPATH}:${SHA}
+    "${ACR}${ACRPATH}:${SHA}"
   ]
 }
 
