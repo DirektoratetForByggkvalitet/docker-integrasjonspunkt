@@ -1,0 +1,12 @@
+name: test Azure login action
+
+on:
+    workflow_dispatch:
+
+jobs:
+    login:
+        runs-on: [self-hosted, macOS]
+        steps:
+            - uses: azure/login@v2
+              with:
+                creds: '{"clientId":"${{ vars.AZURE_SP_ID }}","clientSecret":"${{ secrets.AZURE_SP_CERT }}","subscriptionId":"${{ vars.AZURE_SP_SUB_ID }}","tenantId":"${{ vars.AZURE_TENANT_ID }}"}'
