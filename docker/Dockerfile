@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates cu
 
 # Installerer s6-overlay - https://github.com/just-containers/s6-overlay
 ARG S6_OVERLAY_VERSION
-ADD https://bitbucket.org/dibk/s6-overlay-installer.git /s6-overlay-installer
+ADD https://github.com/DirektoratetForByggkvalitet/s6-overlay-installer.git /s6-overlay-installer
 RUN /s6-overlay-installer/s6_install.sh && rm -rf /s6-overlay-installer
 ENTRYPOINT ["/init"]
 

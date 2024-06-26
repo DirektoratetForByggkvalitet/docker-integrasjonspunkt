@@ -4,41 +4,45 @@
 name: Build and deploy container app to Azure Web App - dibk-ip-prod
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
+
+env:
+  acrPath: app/integrasjonspunkt
 
 jobs:
   build:
-    runs-on: 'ubuntu-latest'
+    runs-on: [self-hosted, macOS]
+    environment: production
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+    - name: Lås opp nøkkelring
+      run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
 
     - name: Log in to registry
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
-        registry: https://dibknoe.azurecr.io/
+        registry: https://${{ vars.ACR }}/
         username: ${{ secrets.AzureAppService_ContainerUsername_d17a460f781b44b0a1f6269b5e630137 }}
         password: ${{ secrets.AzureAppService_ContainerPassword_0f7bf61684fc4cec8f9ba8f0feed7389 }}
 
-    - name: Build and push container image to registry
-      uses: docker/build-push-action@v3
+    - name: Build and push
+      uses: docker/bake-action@v5
+      env:
+        ACR: ${{ vars.ACR }}
+        ACRPATH: ${{ env.acrPath }}
+        SHA: ${{ github.sha }}
       with:
+        files: 'docker/docker-bake.hcl'
         push: true
-        tags: dibknoe.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_d17a460f781b44b0a1f6269b5e630137 }}/app/integrasjonspunkt:${{ github.sha }}
-        file: ./Dockerfile
-
+  
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build
-    environment:
-      name: 'production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
     - name: Deploy to Azure Web App
@@ -48,4 +52,4 @@ jobs:
         app-name: 'dibk-ip-prod'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_8e31a0a286fe4f0a9fc10228293a10a9 }}
-        images: 'dibknoe.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_d17a460f781b44b0a1f6269b5e630137 }}/app/integrasjonspunkt:${{ github.sha }}'
+        images: '${{ vars.ACR }}${{ env.acrPath }}:${{ github.sha }}'
