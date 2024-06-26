@@ -18,6 +18,8 @@ variable "S6_OVERLAY_VERSION" {
 }
 
 variable "SHA" {}
+variable "ACR" {}
+variable "ACRPATH" {}
 
 group "default" {
   targets = ["staging"]
@@ -38,9 +40,7 @@ target "production" {
     S6_OVERLAY_VERSION = S6_OVERLAY_VERSION
   }
   tags = [
-    "dibknoe.azurecr.io/app/integrasjonspunkt:latest", 
-    "dibknoe.azurecr.io/app/integrasjonspunkt:${APP_VERSION}",
-    "${ACR}${ACRPATH}:${SHA}"
+    "${ACR}${ACRPATH}:latest", "${ACR}${ACRPATH}:${APP_VERSION}", "${ACR}${ACRPATH}:${SHA}"
   ]
 }
 
