@@ -103,7 +103,7 @@ jobs:
         SHA: ${{ github.sha }}
         APP_DIR: ${{env.appDir}}
       with:
-        files: 'docker/docker-bake.hcl'
+        files: 'docker-bake.hcl'
         push: true
   
   deploy:
