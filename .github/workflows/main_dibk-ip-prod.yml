@@ -25,16 +25,11 @@ jobs:
     - name: Lås opp nøkkelring
       run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
 
-    - name: Log in to registry
-      uses: docker/login-action@v3
-      with:
-        registry: https://${{ vars.ACR }}/
-        username: ${{ secrets.AzureAppService_ContainerUsername_d17a460f781b44b0a1f6269b5e630137 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_0f7bf61684fc4cec8f9ba8f0feed7389 }}
     - name: Azure CLI login
       run: |
         echo "${{ secrets.AZURE_SP_CERT }}" > sp.cert
         az login --service-principal -u ${{ vars.AZURE_SP_ID }} -p ./sp.cert --tenant ${{ vars.AZURE_TENANT_ID }}
+        az acr login --name ${{vars.ACR}}
     - name: Henter virksomhetssertifikat fra Key Vault og setter passord på det
       run: |
         az keyvault secret download --encoding base64 --name ${{ vars.AZURE_KV_CERT_NAME }} --file vs.p12 --vault-name ${{ vars.KEYVAULT_NAME }}
