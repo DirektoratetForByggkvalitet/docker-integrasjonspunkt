@@ -11,8 +11,9 @@ on:
 
 env:
   acrPath: /app/integrasjonspunkt
-  appDir: /app/integrasjonspunkt
+  appDir: /app
   s6version: '3.2.0.0'
+  mavenRepo: 'https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt'
 
 jobs:
   build:
@@ -20,7 +21,27 @@ jobs:
     environment: production
 
     steps:
+    - name: Henter inn integrasjonspunktets versjon
+      id: getVersion
+      run: |
+        curl -Lso maven-metadata.xml "https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt/maven-metadata.xml"
+        echo "appVersion=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)" >> $GITHUB_OUTPUT
+
     - uses: actions/checkout@v4
+
+    - name: Hent integrasjonspunktet fra cache
+      id: app-cache
+      uses: actions/cache@v4
+      env:
+        cache-name: app-cache
+      with:
+        path: ./app.jar
+        key: ${{env.cache-name}}-${{ steps.getVersion.outputs.appVersion }}
+        restore-keys: ${{ env.cache-name }}-
+    
+    - name: Last ned integrasjonspunktet
+      if: steps.app-cache.outputs.cache-hit != 'true'
+      run: curl -Lso ./app.jar ${{env.mavenRepo}}/${{steps.getVersion.outputs.appVersion}}/integrasjonspunkt-${{steps.getVersion.outputs.appVersion}}.jar
 
     - name: Lås opp nøkkelring
       run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
@@ -38,11 +59,6 @@ jobs:
         openssl pkcs12 -export -in vs-auth.pem -out auth.p12 -passout pass:${{secrets.KEYSTORE_PASS}} -name ${{vars.KEYSTORE_ALIAS}}
         rm vs-auth.pem vs.p12
 
-    - name: Henter inn integrasjonspunktets versjon
-      id: getVersion
-      run: |
-        curl -Lso maven-metadata.xml "https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt/maven-metadata.xml"
-        echo "appVersion=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)" >> $GITHUB_OUTPUT
 
     - name: Henter inn CA-sertifikater
       run: |

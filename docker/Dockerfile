@@ -13,7 +13,7 @@ RUN /s6-overlay-installer/s6_install.sh && rm -rf /s6-overlay-installer
 ENTRYPOINT ["/init"]
 
 # Oppsett for cacerts + oppretting av brukeren java
-ARG APP_DIR=/app/integrasjonspunkt
+ARG APP_DIR=/app
 ARG ALTINN_HOST=altinn.no
 ENV APP_DIR=${APP_DIR} CERTHOST=${ALTINN_HOST}
 # Legger til CA-sertifikater fra BuyPass og Commfides
@@ -31,10 +31,7 @@ RUN mkdir -p ${APP_DIR} && \
     done && \
     rm -rf /tmp/trustcerts
 
-ARG APP_VERSION
-ENV APP_VERSION=${APP_VERSION}
-ARG MAVEN_REPO=https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt
-RUN curl -Lso ${APP_DIR}/app.jar ${MAVEN_REPO}/${APP_VERSION}/integrasjonspunkt-${APP_VERSION}.jar 
+ADD ./app.jar ${APP_DIR}/app.jar
 
 # Oppsett for openssh-server
 ADD docker/sshd_config /etc/ssh/sshd_config
@@ -57,7 +54,7 @@ RUN chown -R www-data:www-data ${APP_DIR} && \
 EXPOSE ${SSH_PORT} ${SERVER_PORT}
 # HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:9093/manage/health || exit 1
 WORKDIR ${APP_DIR}
-ARG profile=staging
+ARG profile=production
 ENV SPRING_PROFILES_ACTIVE=${profile}
 ARG JAVA_OPTS="-Xmx2g"
 ENV JAVA_OPTS=${JAVA_OPTS}
