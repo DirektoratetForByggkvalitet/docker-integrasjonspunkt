@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  acrPath: app/integrasjonspunkt
+  acrPath: /app/integrasjonspunkt
   appDir: /app/integrasjonspunkt
   s6version: '3.2.0.0'
 
