@@ -15,7 +15,6 @@ variable "S6_OVERLAY_VERSION" {
   default = null
 }
 
-variable "SHA" {}
 variable "ACR" {
   default = "dibknoe.azurecr.io"
 }
@@ -36,18 +35,18 @@ target "production" {
   args = {
     APP_VERSION = APP_VERSION
     APP_DIR = APP_DIR
-    profile = APP_ENV
+    APP_ENV = APP_ENV
     SERVER_PORT = SERVER_PORT
     S6_OVERLAY_VERSION = S6_OVERLAY_VERSION
   }
   tags = [
-    "${ACR}${ACRPATH}:latest", "${ACR}${ACRPATH}:${APP_VERSION}", "${ACR}${ACRPATH}:${SHA}"
+    "${ACR}${ACRPATH}:latest", "${ACR}${ACRPATH}:${APP_ENV}"
   ]
 }
 
 target "staging" {
   inherits = ["production"]
-  tags = ["dibknoe.azurecr.io/app/integrasjonspunkt:${APP_ENV}", "dibknoe.azurecr.io/app/integrasjonspunkt:${SHA}"]
+  tags = ["${ACR}${ACRPATH}:${APP_ENV}"]
 }
 
 

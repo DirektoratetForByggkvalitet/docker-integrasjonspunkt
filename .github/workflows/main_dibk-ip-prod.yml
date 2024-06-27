@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy container app to Azure Web App - dibk-ip-prod
+name: Bygger og ruller ut konteiner-app til Azure - dibk-ip-prod
 
 on:
   push:
@@ -14,18 +14,19 @@ env:
   appDir: /app
   s6version: '3.2.0.0'
   mavenRepo: 'https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt'
+  certsUrl: 'https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod'
   altinnPort: 443
 
 jobs:
-  build:
+  bygging:
     runs-on: [self-hosted, macOS]
     environment: production
 
     steps:
     - name: Henter inn integrasjonspunktets versjon
-      id: getVersion
+      id: getAppVersion
       run: |
-        curl -Lso maven-metadata.xml "https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt/maven-metadata.xml"
+        curl -Lso maven-metadata.xml "${{ env.mavenRepo }}/maven-metadata.xml"
         echo "appVersion=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)" >> $GITHUB_OUTPUT
 
     - uses: actions/checkout@v4
@@ -37,12 +38,12 @@ jobs:
         cache-name: app-cache
       with:
         path: ./app.jar
-        key: ${{env.cache-name}}-${{ steps.getVersion.outputs.appVersion }}
+        key: ${{env.cache-name}}-${{ steps.getAppVersion.outputs.appVersion }}
         restore-keys: ${{ env.cache-name }}-
     
     - name: Last ned integrasjonspunktet
       if: steps.app-cache.outputs.cache-hit != 'true'
-      run: curl -Lso ./app.jar ${{env.mavenRepo}}/${{steps.getVersion.outputs.appVersion}}/integrasjonspunkt-${{steps.getVersion.outputs.appVersion}}.jar
+      run: curl -Lso ./app.jar ${{ env.mavenRepo }}/${{ steps.getAppVersion.outputs.appVersion }}/integrasjonspunkt-${{ steps.getAppVersion.outputs.appVersion }}.jar
 
     - name: Lås opp nøkkelring
       run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
@@ -63,13 +64,13 @@ jobs:
 
     - name: Henter inn CA-sertifikater
       run: |
-        curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/BPClass3RootCA.cer"
-        curl -Lso docker/trustcerts/CommfidesClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/cpn%20rootca%20sha256%20class%203.crt"
+        curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "${{ env.certsUrl }}/BPClass3RootCA.cer"
+        curl -Lso docker/trustcerts/CommfidesClass3RootCA.cer "${{ env.certsUrl }}/cpn%20rootca%20sha256%20class%203.crt"
         openssl s_client -connect ${{vars.ALTINN_HOST}}:${{env.altinnPort}} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > docker/trustcerts/${{vars.ALTINN_HOST}}.cer
 
-    - name: Befolker properties-fila
+    - name: Befolker properties og motd
       env:
-        APP_VERSION: ${{steps.getVersion.outputs.appVersion}}
+        APP_VERSION: ${{steps.getAppVersion.outputs.appVersion}}
         APP_ENV: ${{vars.APP_ENV}}
         SERVER_PORT: ${{vars.SERVER_PORT}}
         ORG_NR: ${{vars.ORG_NR}}
@@ -112,21 +113,21 @@ jobs:
     - name: Bygger og publiserer image
       uses: docker/bake-action@v5
       env:
-        APP_ENV: ${{vars.APP_ENV}}
-        APP_VERSION: ${{steps.getVersion.outputs.appVersion}}
-        S6_OVERLAY_VERSION: ${{env.s6version}}
+        APP_ENV: ${{ vars.APP_ENV }}
+        APP_VERSION: ${{ steps.getAppVersion.outputs.appVersion }}
+        S6_OVERLAY_VERSION: ${{ env.s6version }}
         ACR: ${{ vars.ACR }}
         ACRPATH: ${{ env.acrPath }}
-        SHA: ${{ github.sha }}
-        APP_DIR: ${{env.appDir}}
-        SERVER_PORT: ${{vars.SERVER_PORT}}
+        APP_DIR: ${{ env.appDir }}
+        SERVER_PORT: ${{ vars.SERVER_PORT }}
       with:
         files: 'docker-bake.hcl'
         push: true
   
-  deploy:
+  utrulling:
     runs-on: self-hosted
-    needs: build
+    needs: bygging
+    environment: production
 
     steps:
     - name: Deploy to Azure Web App
@@ -136,4 +137,4 @@ jobs:
         app-name: 'dibk-ip-prod'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_8e31a0a286fe4f0a9fc10228293a10a9 }}
-        images: '${{ vars.ACR }}${{ env.acrPath }}:${{ github.sha }}'
+        images: '${{ vars.ACR }}${{ env.acrPath }}:${{vars.APP_ENV}}'

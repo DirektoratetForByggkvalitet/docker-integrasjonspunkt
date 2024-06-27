@@ -50,7 +50,8 @@ RUN mkdir -p ${APP_DIR}/integrasjonspunkt-logs ${APP_DIR}/activemq-data && \
 EXPOSE ${SSH_PORT} ${SERVER_PORT}
 # HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:9093/manage/health || exit 1
 WORKDIR ${APP_DIR}
-ARG profile=production
-ENV SPRING_PROFILES_ACTIVE=${profile}
+ARG APP_ENV=production
+ENV APP_ENV=${APP_ENV}
+ENV SPRING_PROFILES_ACTIVE=${APP_ENV}
 ARG JAVA_OPTS="-Xmx2g"
 ENV JAVA_OPTS=${JAVA_OPTS}
