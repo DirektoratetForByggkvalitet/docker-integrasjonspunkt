@@ -39,7 +39,8 @@ RUN chmod -R 644 /etc/s6-overlay/s6-rc.d/* && chmod -R a+rX /etc/s6-overlay/s6-r
 ARG SERVER_PORT=9093
 ENV SERVER_PORT=${SERVER_PORT} SSH_PORT=2222 TZ="Europe/Oslo"
 ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.properties
-ADD auth.p12 ${APP_DIR}/auth.p12
+ARG KEYSTORE_FILE=auth.p12
+ADD ${KEYSTORE_FILE} ${APP_DIR}/${KEYSTORE_FILE}
 
 # Opprydding
 RUN mkdir -p ${APP_DIR}/integrasjonspunkt-logs ${APP_DIR}/activemq-data && \

@@ -40,7 +40,8 @@ target "production" {
     S6_OVERLAY_VERSION = S6_OVERLAY_VERSION
   }
   tags = [
-    "${ACR}${ACRPATH}:latest", "${ACR}${ACRPATH}:${APP_ENV}"
+    "${ACR}${ACRPATH}:latest", 
+    "${ACR}${ACRPATH}:${APP_ENV}"
   ]
 }
 
