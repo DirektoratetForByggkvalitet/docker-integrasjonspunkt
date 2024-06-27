@@ -20,13 +20,10 @@ jobs:
     environment: production
 
     steps:
-    - name: Henter inn integrasjonspunktets versjon
-      id: getAppVersion
-      run: |
-        curl -Lso maven-metadata.xml "${{ env.mavenRepo }}/maven-metadata.xml"
-        echo "appVersion=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)" >> $GITHUB_OUTPUT
-
     - uses: actions/checkout@v4
+
+    - name: Lås opp nøkkelring
+      run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
 
     - name: Azure CLI login
       run: |
@@ -42,6 +39,12 @@ jobs:
         openssl pkcs12 -export -in vs-auth.pem -out ${{ vars.KEYSTORE_FILE }} -passout pass:${{secrets.KEYSTORE_PASS}} -name ${{vars.KEYSTORE_ALIAS}}
         rm vs-auth.pem vs.p12
 
+    - name: Henter inn integrasjonspunktets versjon
+      id: getAppVersion
+      run: |
+        curl -Lso maven-metadata.xml "${{ env.mavenRepo }}/maven-metadata.xml"
+        echo "appVersion=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)" >> $GITHUB_OUTPUT
+
     - name: Hent integrasjonspunktet fra cache
       id: app-cache
       uses: actions/cache@v4
@@ -56,17 +59,11 @@ jobs:
       if: steps.app-cache.outputs.cache-hit != 'true'
       run: curl -Lso ./app.jar ${{ env.mavenRepo }}/${{ steps.getAppVersion.outputs.appVersion }}/integrasjonspunkt-${{ steps.getAppVersion.outputs.appVersion }}.jar
 
-    - name: Lås opp nøkkelring
-      run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
-
-
     - name: Henter inn CA-sertifikater
       run: |
         curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "${{ env.certsUrl }}/BPClass3RootCA.cer"
         curl -Lso docker/trustcerts/CommfidesClass3RootCA.cer "${{ env.certsUrl }}/cpn%20rootca%20sha256%20class%203.crt"
         openssl s_client -connect ${{vars.ALTINN_HOST}}:${{env.altinnPort}} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > docker/trustcerts/${{vars.ALTINN_HOST}}.cer
-
-
 
     - name: Befolker properties og motd
       env:
