@@ -19,6 +19,7 @@ ENV APP_DIR=${APP_DIR}
 ADD docker/trustcerts /tmp/trustcerts
 RUN mkdir -p ${APP_DIR} && \
     echo "Importerer sertifikater til cacerts" && \
+    rm /tmp/trustcerts/.gitignore && \
     for FILE in /tmp/trustcerts/*; do \
         keytool -import -noprompt -trustcacerts -alias "${FILE%.*}" -file "${FILE}" \
         -keystore ${JAVA_HOME}/lib/security/cacerts -storepass changeit; \
