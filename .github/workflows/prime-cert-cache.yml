@@ -26,6 +26,7 @@ jobs:
       with:
         path: docker/trustcerts
         key: ${{env.cache-name}}-${{ hashFiles('**/trustcerts/*.cer') }}
+        restore-keys: ${{ env.cache-name }}-
 
     
     - name: Tester certs
