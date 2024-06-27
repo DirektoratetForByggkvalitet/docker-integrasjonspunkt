@@ -61,18 +61,7 @@ jobs:
         openssl pkcs12 -export -in vs-auth.pem -out auth.p12 -passout pass:${{secrets.KEYSTORE_PASS}} -name ${{vars.KEYSTORE_ALIAS}}
         rm vs-auth.pem vs.p12
 
-    - name: Henter inn CA-sertifikater fra cache
-      uses: actions/cache@v4
-      id: ca-certs-cache
-      env:
-        cache-name: ca-certs-cache
-      with:
-        path: docker/trustcerts
-        key: ${{env.cache-name}}-${{ hashFiles('docker/trustcerts/*.cer') }}
-        restore-keys: ${{ env.cache-name }}-
-
-    - name: Henter inn CA-sertifikater uten cache
-      if: steps.ca-certs-cache.outputs.cache-hit != 'true'
+    - name: Henter inn CA-sertifikater
       run: |
         curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/BPClass3RootCA.cer"
         curl -Lso docker/trustcerts/CommfidesClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/cpn%20rootca%20sha256%20class%203.crt"
