@@ -47,7 +47,8 @@ ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.proper
 ADD auth.p12 ${APP_DIR}/auth.p12
 
 # Opprydding
-RUN chown -R www-data:www-data ${APP_DIR} && \
+RUN mkdir -p ${APP_DIR}/integrasjonspunkt-logs ${APP_DIR}/activemq-data && \
+    chown -R www-data:www-data ${APP_DIR} && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     echo "" > /etc/motd
 

@@ -6,4 +6,9 @@ if [ -n "${PORT+set}" ]; then
     export SERVER_PORT=$PORT
 fi
 unset JAVA_TOOL_OPTIONS
-exec java ${JAVA_OPTS} -jar app.jar
+runAsUser=www-data
+if [ "$SERVER_PORT" -lte "1024" ]; then
+    # Må kjøre som root med SERVER_PORT < 1024
+    runAsUser=root
+fi
+exec s6-setuidgid $runAsUser java ${JAVA_OPTS} -jar app.jar
