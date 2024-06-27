@@ -28,6 +28,12 @@ jobs:
 
     - uses: actions/checkout@v4
 
+    - name: Azure CLI login
+      run: |
+        echo "${{ secrets.AZURE_SP_CERT }}" > sp.cert
+        az login --service-principal -u ${{ vars.AZURE_SP_ID }} -p ./sp.cert --tenant ${{ vars.AZURE_TENANT_ID }}
+        az acr login --name ${{vars.ACR}}
+
     - name: Henter virksomhetssertifikat fra Key Vault og setter passord på det
       run: |
         az keyvault secret download --encoding base64 --name ${{ vars.AZURE_KV_CERT_NAME }} --file vs.p12 --vault-name ${{ vars.KEYVAULT_NAME }}
@@ -53,11 +59,6 @@ jobs:
     - name: Lås opp nøkkelring
       run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
 
-    - name: Azure CLI login
-      run: |
-        echo "${{ secrets.AZURE_SP_CERT }}" > sp.cert
-        az login --service-principal -u ${{ vars.AZURE_SP_ID }} -p ./sp.cert --tenant ${{ vars.AZURE_TENANT_ID }}
-        az acr login --name ${{vars.ACR}}
 
     - name: Henter inn CA-sertifikater
       run: |
