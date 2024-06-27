@@ -14,6 +14,7 @@ env:
   appDir: /app
   s6version: '3.2.0.0'
   mavenRepo: 'https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt'
+  altinnPort: 443
 
 jobs:
   build:
@@ -67,15 +68,15 @@ jobs:
         cache-name: ca-certs-cache
       with:
         path: docker/trustcerts
-        key: ${{env.cache-name}}-${{ hashFiles('docker/trustcerts/*') }}
+        key: ${{env.cache-name}}-${{ hashFiles('docker/trustcerts/*.cer') }}
         restore-keys: ${{ env.cache-name }}-
 
-    - name: Henter inn CA-sertifikater
+    - name: Henter inn CA-sertifikater uten cache
       if: steps.ca-certs-cache.outputs.cache-hit != 'true'
       run: |
-        mkdir -p docker/trustcerts
         curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/BPClass3RootCA.cer"
         curl -Lso docker/trustcerts/CommfidesClass3RootCA.cer "https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod/cpn%20rootca%20sha256%20class%203.crt"
+        openssl s_client -connect ${{vars.ALTINN_HOST}}:${{env.altinnPort}} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > docker/trustcerts/${{vars.ALTINN_HOST}}.cer
 
     - name: Befolker properties-fila
       env:

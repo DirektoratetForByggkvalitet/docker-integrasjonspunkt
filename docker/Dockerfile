@@ -14,20 +14,14 @@ ENTRYPOINT ["/init"]
 
 # Oppsett for cacerts + oppretting av brukeren java
 ARG APP_DIR=/app
-ARG ALTINN_HOST=altinn.no
-ENV APP_DIR=${APP_DIR} CERTHOST=${ALTINN_HOST}
-# Legger til CA-sertifikater fra BuyPass og Commfides
+ENV APP_DIR=${APP_DIR}
+# Legger til sertifikate
 ADD docker/trustcerts /tmp/trustcerts
 RUN mkdir -p ${APP_DIR} && \
-    export CERTPORT=443 TRUSTSTOREFILE=${JAVA_HOME}/lib/security/cacerts TRUSTSTOREPASS=changeit && \
-    openssl s_client -connect ${CERTHOST}:${CERTPORT} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${CERTHOST}.cert && \
-    keytool -import -noprompt -trustcacerts -alias ${CERTHOST} -file ${CERTHOST}.cert \
-        -keystore ${TRUSTSTOREFILE} -storepass ${TRUSTSTOREPASS} && \
-    rm ${CERTHOST}.cert && \
-    echo "Importerer CA-sertifikater fra BuyPass og Commfides til cacerts" && \
+    echo "Importerer sertifikater til cacerts" && \
     for FILE in /tmp/trustcerts/*; do \
         keytool -import -noprompt -trustcacerts -alias "${FILE%.*}" -file "${FILE}" \
-        -keystore ${TRUSTSTOREFILE} -storepass ${TRUSTSTOREPASS}; \
+        -keystore ${JAVA_HOME}/lib/security/cacerts -storepass changeit; \
     done && \
     rm -rf /tmp/trustcerts
 

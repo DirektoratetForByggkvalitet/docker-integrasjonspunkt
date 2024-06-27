@@ -7,9 +7,7 @@ variable "APP_DIR" {
 variable "APP_ENV" {
   default = null
 }
-variable "ALTINN_HOST" {
-  default = "altinn.no"
-}
+
 variable "SERVER_PORT" {
   default = "9093"
 }
@@ -18,8 +16,12 @@ variable "S6_OVERLAY_VERSION" {
 }
 
 variable "SHA" {}
-variable "ACR" {}
-variable "ACRPATH" {}
+variable "ACR" {
+  default = "dibknoe.azurecr.io"
+}
+variable "ACRPATH" {
+  default = "/app/integrasjonspunkt"
+}
 
 group "default" {
   targets = ["staging"]
@@ -33,7 +35,6 @@ target "production" {
   ]
   args = {
     APP_VERSION = APP_VERSION
-    ALTINN_HOST = ALTINN_HOST
     APP_DIR = APP_DIR
     profile = APP_ENV
     SERVER_PORT = SERVER_PORT
