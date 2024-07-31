@@ -41,7 +41,8 @@ target "production" {
   }
   tags = [
     "${ACR}${ACRPATH}:latest", 
-    "${ACR}${ACRPATH}:${APP_ENV}"
+    "${ACR}${ACRPATH}:${APP_ENV}",
+    "${ACR}${ACRPATH}:${APP_VERSION}"
   ]
 }
 
