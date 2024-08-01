@@ -48,7 +48,7 @@ target "production" {
 
 target "staging" {
   inherits = ["production"]
-  tags = ["${ACR}${ACRPATH}:${APP_ENV}"]
+  tags = ["${ACR}${ACRPATH}:${APP_ENV}", "${ACR}${ACRPATH}:${APP_ENV}-${APP_VERSION}"]
 }
 
 
