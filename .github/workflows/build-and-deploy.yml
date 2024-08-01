@@ -121,6 +121,7 @@ jobs:
       with:
         files: 'docker-bake.hcl'
         push: true
+        targets: ${{ vars.APP_ENV }}
   
   utrulling:
     runs-on: self-hosted
