@@ -1,4 +1,4 @@
-name: Bygger og ruller ut konteiner-app til Azure - dibk-ip-prod
+name: Bygg og rull ut - dibk-ip-prod
 
 on:
   workflow_dispatch:
