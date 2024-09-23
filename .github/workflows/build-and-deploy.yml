@@ -23,14 +23,15 @@ jobs:
       sha_short: ${{ steps.build_vars.outputs.sha_short }}
 
     steps:
+
+    - uses: actions/checkout@v4
+    
     - name: Sett byggevariabler
       run: |
         echo "build_date=$(date '+%Y%m%d')" >> $GITHUB_OUTPUT
         echo "build_date_long=$(date '+%Y%m%d_%H%M')" >> $GITHUB_OUTPUT
         echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       id: build_vars
-
-    - uses: actions/checkout@v4
 
     - name: Lås opp nøkkelring
       run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
