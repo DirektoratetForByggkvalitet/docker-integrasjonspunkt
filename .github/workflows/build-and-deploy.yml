@@ -19,8 +19,17 @@ jobs:
   bygging:
     runs-on: [self-hosted, macOS]
     environment: production
+    outputs:
+      sha_short: ${{ steps.build_vars.outputs.sha_short }}
 
     steps:
+    - name: Sett byggevariabler
+      run: |
+        echo "build_date=$(date '+%Y%m%d')" >> $GITHUB_OUTPUT
+        echo "build_date_long=$(date '+%Y%m%d_%H%M')" >> $GITHUB_OUTPUT
+        echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      id: build_vars
+
     - uses: actions/checkout@v4
 
     - name: Lås opp nøkkelring
@@ -42,8 +51,7 @@ jobs:
     - name: Henter virksomhetssertifikat fra Key Vault og setter passord på det
       run: |
         az keyvault secret download --encoding base64 --name ${{ vars.AZURE_KV_CERT_NAME }} --file vs.p12 --vault-name ${{ vars.KEYVAULT_NAME }}
-        empty=
-        openssl pkcs12 -in vs.p12 -passin pass:$empty -nodes -out vs-auth.pem
+        openssl pkcs12 -in vs.p12 -passin pass: -nodes -out vs-auth.pem
         openssl pkcs12 -export -in vs-auth.pem -out ${{ vars.KEYSTORE_FILE }} -passout pass:${{secrets.KEYSTORE_PASS}} -name ${{vars.KEYSTORE_ALIAS}}
         rm vs-auth.pem vs.p12
 
@@ -128,7 +136,7 @@ jobs:
           type=sha,prefix=${{ vars.APP_ENV }}-,format=short
           # set latest tag for production branch
           type=raw,value=latest
-          type=raw,value=${{ vars.APP_ENV }}
+          type=raw,value=${{steps.getAppVersion.outputs.appVersion}}-${{ vars.APP_ENV }}
 
     - name: Bygg og push
       uses: docker/build-push-action@v6
@@ -180,4 +188,4 @@ jobs:
         app-name: 'dibk-ip-prod'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_8e31a0a286fe4f0a9fc10228293a10a9 }}
-        images: '${{ vars.ACR }}${{ env.acrPath }}:${{vars.APP_ENV}}'
+        images: '${{ vars.ACR }}${{ env.acrPath }}:${{ vars.APP_ENV }}-${{needs.bygging.outputs.sha_short}}'

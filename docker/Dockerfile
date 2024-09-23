@@ -1,6 +1,9 @@
 FROM eclipse-temurin:20-jre-jammy
-LABEL no.dibk.description "Docker-image for Digdir integrasjonspunkt, basert på eclipse-temurin"
-LABEL no.dibk.author "Eirik Wulff <ew@dibk.no>"
+LABEL no.dibk.description="Docker-image for Digdir integrasjonspunkt, basert på eclipse-temurin"
+LABEL no.dibk.author="Eirik Wulff <ew@dibk.no>"
+ARG APP_VERSION
+ENV APP_VERSION=${APP_VERSION}
+LABEL no.digdir.integrasjonspunkt.version="${APP_VERSION}"
 
 ENV TERM=xterm DEBIAN_FRONTEND=noninteractive
 
