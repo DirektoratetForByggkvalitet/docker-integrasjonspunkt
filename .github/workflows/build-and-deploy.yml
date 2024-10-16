@@ -2,6 +2,8 @@ name: Bygg og rull ut - dibk-ip-prod
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "4 7 */2 * *"
 
 env:
   acrPath: /app/integrasjonspunkt
