@@ -7,7 +7,7 @@ if [ -n "${PORT+set}" ]; then
 fi
 unset JAVA_TOOL_OPTIONS
 runner=www-data
-if [ $SERVER_PORT -lt 1024 ]; then
+if [ $SERVER_PORT -le 1024 ]; then
     # Må kjøre som root med SERVER_PORT < 1024
     runner=root
 fi

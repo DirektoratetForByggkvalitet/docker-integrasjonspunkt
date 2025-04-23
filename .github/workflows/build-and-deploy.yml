@@ -20,6 +20,9 @@ permissions:
 jobs:
   bygging:
     runs-on: [self-hosted, macOS]
+    concurrency:
+      group: integrasjonspunkt-production-build
+      cancel-in-progress: true
     environment: production
     outputs:
       sha_short: ${{ steps.build_vars.outputs.sha_short }}
