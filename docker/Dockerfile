@@ -1,4 +1,4 @@
-FROM eclipse-temurin:20-jre-jammy
+FROM eclipse-temurin:21-jre-jammy
 LABEL no.dibk.description="Docker-image for Digdir integrasjonspunkt, basert på eclipse-temurin"
 LABEL no.dibk.author="Eirik Wulff <ew@dibk.no>"
 ARG APP_VERSION
