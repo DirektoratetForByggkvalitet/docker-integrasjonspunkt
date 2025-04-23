@@ -68,7 +68,12 @@ jobs:
       id: getAppVersion
       run: |
         curl -Lso maven-metadata.xml "${{ env.mavenRepo }}/maven-metadata.xml"
-        echo "appVersion=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)" >> $GITHUB_OUTPUT
+        appVersion=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
+        # Fallback dersom siste versjon er merket beta
+        if [[ "$appVersion" =~ "beta" ]]; then
+          appVersion=${{ vars.JAR_VERSION }}
+        fi
+        echo "jarVersion=${appV}" >> $GITHUB_OUTPUT
 
     - name: Hent integrasjonspunktets jar-fil fra cache
       id: app-cache
