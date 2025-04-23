@@ -1,4 +1,4 @@
-FROM eclipse-temurin:20-jre-jammy
+FROM eclipse-temurin:8-jre-jammy
 LABEL no.dibk.description="Docker-image for Digdir integrasjonspunkt, basert på eclipse-temurin"
 LABEL no.dibk.author="Eirik Wulff <ew@dibk.no>"
 ARG APP_VERSION
@@ -10,7 +10,7 @@ ENV TERM=xterm DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -yq openssh-server nano ca-certificates curl openssl xz-utils
 
 # Installerer s6-overlay - https://github.com/just-containers/s6-overlay
-ARG S6_OVERLAY_VERSION="3.2.0.0"
+ARG S6_OVERLAY_VERSION="3.2.0.2"
 ADD https://github.com/DirektoratetForByggkvalitet/s6-overlay-installer.git /s6-overlay-installer
 RUN /s6-overlay-installer/s6_install.sh && rm -rf /s6-overlay-installer
 ENTRYPOINT ["/init"]
