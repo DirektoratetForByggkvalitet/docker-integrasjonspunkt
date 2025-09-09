@@ -148,6 +148,12 @@ jobs:
           type=raw,value=latest
           type=raw,value=${{steps.getAppVersion.outputs.appVersion}}-${{ vars.APP_ENV }}
 
+    - name: Oppsett av Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        name: integrasjonspunkt-builder
+        driver: docker-container
+
     - name: Bygg og push
       uses: docker/build-push-action@v6
       with:
