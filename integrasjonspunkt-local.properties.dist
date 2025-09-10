@@ -37,8 +37,10 @@ difi.security.user.password=${AUTH_PASSWORD}
 difi.datasource.url=${DB_URL}
 difi.datasource.username=${DB_USERNAME}
 difi.datasource.password=${DB_PASSWORD}
+
 # Lagre meldinger i databasen
 difi.move.nextmove.useDbPersistence=true
+difi.move.nextmove.default-ttl-hours=${MESSAGE_TTL}
 
 # Meldingskø
 difi.activemq.broker-url=vm://localhost

@@ -129,6 +129,7 @@ jobs:
         MAIL_AUTH: ${{vars.MAIL_AUTH}}
         MAIL_USER: ${{vars.MAIL_USER}}
         MAIL_PASSWORD: ${{secrets.MAIL_PASSWORD}}
+        MESSAGE_TTL: ${{ vars.MESSAGE_TTL }}
       run: |
         envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
         envsubst < "docker/motd.template" > "docker/motd.sh"
