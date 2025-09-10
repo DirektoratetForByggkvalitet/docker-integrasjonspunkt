@@ -69,6 +69,7 @@ Vi bruker et step som kjører envsubst for å befolke innstillingsfila til integ
 | SVARUT_PASSWORD | Passord for sending av SvarUt-meldinger | |
 | SVARINN_USER | Bruker for å motta meldinger fra SvarUt. Settes opp som mottakersystem i Svarut.ks.no | |
 | SVARINN_PASSWORD | Passord for mottak av meldinger fra SvarUt |
+| MESSAGE_TTL | Levetid i timer for hvor lenge en melding skal ligge før den erklæres som utgått | 24 |
 
 ## Avhengigheter ##
 
