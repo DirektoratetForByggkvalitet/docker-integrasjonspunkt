@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "4 7 */2 * *"
-
+    
 env:
   acrPath: /app/integrasjonspunkt
   appDir: /app
@@ -166,10 +166,10 @@ jobs:
         context: .
         build-args: |
           APP_VERSION=${{ steps.getAppVersion.outputs.appVersion }}
-          APP_DIR = ${{ env.appDir }}
-          APP_ENV = ${{ vars.APP_ENV }}
-          SERVER_PORT = ${{ vars.SERVER_PORT }}
-          S6_OVERLAY_VERSION = ${{ env.s6version }}
+          APP_DIR=${{ env.appDir }}
+          APP_ENV=${{ vars.APP_ENV }}
+          SERVER_PORT=${{ vars.SERVER_PORT }}
+          S6_OVERLAY_VERSION=${{ env.s6version }}
 
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
