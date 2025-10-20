@@ -22,7 +22,8 @@ permissions:
 jobs:
   bygging:
     runs-on:
-      - ubuntu-latest
+      - self-hosted
+      - macOS
     concurrency:
       group: integrasjonspunkt-production-build
       cancel-in-progress: true
@@ -41,8 +42,8 @@ jobs:
         echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       id: build_vars
 
-    # - name: Lås opp nøkkelring
-    #   run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
+    - name: Lås opp nøkkelring
+      run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
 
     - name: Innlogging til Azure CLI (OIDC)
       uses: azure/login@v2
@@ -51,14 +52,13 @@ jobs:
         tenant-id: ${{ vars.AZURE_TENANT_ID }}
         subscription-id: ${{ vars.AZURE_SUBID_INTERNAL }}
 
-    - name: Registry login
-      uses: azure/cli@v2
+
+    - name: Login to ACR
+      uses: docker/login-action@v3
       with:
-        azcliversion: latest
-        inlineScript: |
-          acrname=${{ vars.ACR }}
-          shortname="${acrname%%.*}"
-          az acr login -n $shortname
+        registry: ${{ vars.ACR }}
+        username: ${{ vars.ACRTOKENNAME }}
+        password: ${{ secrets.ACRTOKEN }}
 
     # - name: Logg inn på registry
     #   run: |
@@ -166,6 +166,13 @@ jobs:
       with:
         name: integrasjonspunkt-builder
         driver: docker-container
+
+    # - name: Login to Docker Hub
+    #   uses: docker/login-action@v3
+    #   with:
+    #     registry: ${{ vars.ACR }}
+    #     username: ${{ vars.ACRTOKENNAME }}
+    #     password: ${{ secrets.ACRTOKEN }}
 
     - name: Bygg og push
       uses: docker/build-push-action@v6
