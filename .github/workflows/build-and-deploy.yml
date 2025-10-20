@@ -50,11 +50,20 @@ jobs:
         tenant-id: ${{ vars.AZURE_TENANT_ID }}
         subscription-id: ${{ vars.AZURE_SUBID_INTERNAL }}
 
-    - name: Logg inn på registry
-      run: |
-        acrname=${{ vars.ACR }}
-        shortname="${acrname%%.*}"
-        az acr login -n $shortname
+    - name: Registry login
+      uses: azure/cli@v2
+      with:
+        azcliveversion: latest
+        inlineScript: |
+          acrname=${{ vars.ACR }}
+          shortname="${acrname%%.*}"
+          az acr login -n $shortname
+          
+    # - name: Logg inn på registry
+    #   run: |
+    #     acrname=${{ vars.ACR }}
+    #     shortname="${acrname%%.*}"
+    #     az acr login -n $shortname
 
     - name: Henter virksomhetssertifikat fra Key Vault og setter passord på det
       run: |
