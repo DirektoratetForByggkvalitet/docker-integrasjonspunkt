@@ -13,7 +13,7 @@ env:
   certsUrl: 'https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod'
   altinnPort: 443
   default_ttl: '24'
-  platforms: 'linux/amd64,linux/arm64'
+  platforms: 'linux/amd64'
 
 permissions:
   id-token: write
@@ -21,7 +21,8 @@ permissions:
 
 jobs:
   bygging:
-    runs-on: [self-hosted, macOS]
+    runs-on:
+      - ubuntu-latest
     concurrency:
       group: integrasjonspunkt-production-build
       cancel-in-progress: true
@@ -40,8 +41,8 @@ jobs:
         echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       id: build_vars
 
-    - name: Lås opp nøkkelring
-      run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
+    # - name: Lås opp nøkkelring
+    #   run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
 
     - name: Innlogging til Azure CLI (OIDC)
       uses: azure/login@v2
@@ -53,12 +54,12 @@ jobs:
     - name: Registry login
       uses: azure/cli@v2
       with:
-        azcliveversion: latest
+        azcliversion: latest
         inlineScript: |
           acrname=${{ vars.ACR }}
           shortname="${acrname%%.*}"
           az acr login -n $shortname
-          
+
     # - name: Logg inn på registry
     #   run: |
     #     acrname=${{ vars.ACR }}
