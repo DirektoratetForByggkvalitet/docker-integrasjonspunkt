@@ -193,6 +193,17 @@ jobs:
         cache-from: type=registry,ref=${{ vars.ACR }}${{ env.acrPath }}:${{ vars.APP_ENV }}-buildcache
         cache-to: type=registry,ref=${{ vars.ACR }}${{ env.acrPath }}:${{ vars.APP_ENV }}-buildcache,mode=max
   
+    - name: Feilmelding til Teams
+      if: failure()
+      uses: carriquiry-g/ms-teams-notification@v2 # https://github.com/marketplace/actions/microsoft-teams-channel-notification
+      with:
+        github-token: ${{ github.token }} # this will use the runner's token.
+        ms-teams-webhook-uri: ${{ secrets.TEAMS_DRIFTSMELDINGER_WEBHOOK_URI }}
+        notification-summary: Feil under bygging av Docker-image
+        notification-style: attention
+        timezone: Europe/Oslo
+        verbose-logging: false
+
   utrulling:
     runs-on: self-hosted
     needs: bygging
@@ -209,3 +220,14 @@ jobs:
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_8e31a0a286fe4f0a9fc10228293a10a9 }}
         images: '${{ vars.ACR }}${{ env.acrPath }}:${{ vars.APP_ENV }}-${{needs.bygging.outputs.sha_short}}'
+
+    - name: Feilmelding til Teams
+      if: failure()
+      uses: carriquiry-g/ms-teams-notification@v2 # https://github.com/marketplace/actions/microsoft-teams-channel-notification
+      with:
+        github-token: ${{ github.token }} # this will use the runner's token.
+        ms-teams-webhook-uri: ${{ secrets.TEAMS_DRIFTSMELDINGER_WEBHOOK_URI }}
+        notification-summary: Feil under utrulling til Azure
+        notification-style: attention
+        timezone: Europe/Oslo
+        verbose-logging: false
