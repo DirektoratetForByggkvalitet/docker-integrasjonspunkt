@@ -8,7 +8,7 @@ on:
 env:
   acrPath: /app/integrasjonspunkt
   appDir: /app
-  s6version: '3.2.0.2'
+  s6version: '3.2.1.0'
   mavenRepo: 'https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt'
   certsUrl: 'https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod'
   altinnPort: 443
@@ -30,6 +30,7 @@ jobs:
     environment: production
     outputs:
       sha_short: ${{ steps.build_vars.outputs.sha_short }}
+      appVersion: ${{ steps.build_vars.outputs.appVersion }}
 
     steps:
 
@@ -37,10 +38,18 @@ jobs:
 
     - name: Sett byggevariabler
       run: |
+        appVersion=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
+        if [[ "$appVersion" =~ "beta" ]]; then
+          appVersion=${{ vars.JAR_VERSION }}
+        fi
+        echo "appVersion=${appVersion}" >> $GITHUB_OUTPUT
         echo "build_date=$(date '+%Y%m%d')" >> $GITHUB_OUTPUT
         echo "build_date_long=$(date '+%Y%m%d_%H%M')" >> $GITHUB_OUTPUT
         echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        curl -Lso maven-metadata.xml "${{ env.mavenRepo }}/maven-metadata.xml"
+
       id: build_vars
+
 
     - name: Lås opp nøkkelring
       run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
@@ -73,16 +82,6 @@ jobs:
         openssl pkcs12 -export -in vs-auth.pem -out ${{ vars.KEYSTORE_FILE }} -passout pass:${{secrets.KEYSTORE_PASS}} -name ${{vars.KEYSTORE_ALIAS}}
         rm vs-auth.pem vs.p12
 
-    - name: Henter inn integrasjonspunktets versjon
-      id: getAppVersion
-      run: |
-        curl -Lso maven-metadata.xml "${{ env.mavenRepo }}/maven-metadata.xml"
-        appVersion=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
-        if [[ "$appVersion" =~ "beta" ]]; then
-          appVersion=${{ vars.JAR_VERSION }}
-        fi
-        echo "appVersion=${appVersion}" >> $GITHUB_OUTPUT
-
     - name: Hent integrasjonspunktets jar-fil fra cache
       id: app-cache
       uses: actions/cache@v4
@@ -95,7 +94,7 @@ jobs:
     
     - name: Last ned integrasjonspunktets jar-fil
       if: steps.app-cache.outputs.cache-hit != 'true'
-      run: curl -Lso ./app.jar ${{ env.mavenRepo }}/${{ steps.getAppVersion.outputs.appVersion }}/integrasjonspunkt-${{ steps.getAppVersion.outputs.appVersion }}.jar
+      run: curl -Lso ./app.jar ${{ env.mavenRepo }}/${{ steps.build_vars.outputs.appVersion }}/integrasjonspunkt-${{ steps.build_vars.outputs.appVersion }}.jar
 
     - name: Hent inn CA-sertifikater
       run: |
@@ -105,7 +104,7 @@ jobs:
 
     - name: Befolker properties og motd
       env:
-        APP_VERSION: ${{steps.getAppVersion.outputs.appVersion}}
+        APP_VERSION: ${{steps.build_vars.outputs.appVersion}}
         APP_ENV: ${{vars.APP_ENV}}
         SERVER_PORT: ${{vars.SERVER_PORT}}
         ORG_NR: ${{vars.ORG_NR}}

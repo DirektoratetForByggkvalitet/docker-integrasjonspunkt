@@ -5,11 +5,13 @@ name: Bygg og rull ut - dibk-ip-staging
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "4 6 */2 * *"
 
 env:
   acrPath: /app/integrasjonspunkt
   appDir: /app
-  s6version: '3.2.0.2'
+  s6version: '3.2.1.0'
   mavenRepo: 'https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt'
   certsUrl: 'https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod'
   altinnPort: 443
