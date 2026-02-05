@@ -19,7 +19,7 @@ ENTRYPOINT ["/init"]
 ARG APP_DIR=/app
 ENV APP_DIR=${APP_DIR}
 # Legger til sertifikate
-ADD docker/trustcerts /tmp/trustcerts
+ADD cache/trustcerts /tmp/trustcerts
 RUN mkdir -p ${APP_DIR} && \
     echo "Importerer sertifikater til cacerts" && \
     rm /tmp/trustcerts/.gitignore && \
@@ -29,11 +29,11 @@ RUN mkdir -p ${APP_DIR} && \
     done && \
     rm -rf /tmp/trustcerts
 
-ADD ./app.jar ${APP_DIR}/app.jar
+ADD cache/app.jar ${APP_DIR}/app.jar
 
 # Oppsett for openssh-server
 ADD docker/sshd_config /etc/ssh/sshd_config
-ADD docker/motd.sh /etc/profile.d/motd.sh
+ADD cache/motd.sh /etc/profile.d/motd.sh
 RUN update-ca-certificates && \
     echo "root:Docker!" | chpasswd
 ADD docker/s6-rc.d /etc/s6-overlay/s6-rc.d
@@ -41,8 +41,8 @@ RUN chmod -R 644 /etc/s6-overlay/s6-rc.d/* && chmod -R a+rX /etc/s6-overlay/s6-r
 
 ARG SERVER_PORT=9093
 ENV SERVER_PORT=${SERVER_PORT} SSH_PORT=2222 TZ="Europe/Oslo"
-ADD integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.properties
-ARG KEYSTORE_FILE=auth.p12
+ADD cache/integrasjonspunkt-local.properties ${APP_DIR}/integrasjonspunkt-local.properties
+ARG KEYSTORE_FILE=cache/auth.p12
 ADD ${KEYSTORE_FILE} ${APP_DIR}/${KEYSTORE_FILE}
 
 # Opprydding

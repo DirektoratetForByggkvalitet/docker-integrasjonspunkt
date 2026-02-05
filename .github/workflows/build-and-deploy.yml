@@ -1,4 +1,4 @@
-name: Bygg og rull ut - dibk-ip-prod
+name: Bygg Staging og Production
 
 on:
   workflow_dispatch:
@@ -13,31 +13,28 @@ env:
   certsUrl: 'https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod'
   altinnPort: 443
   default_ttl: '24'
-  platforms: 'linux/amd64'
+  platforms: 'linux/amd64,linux/arm64'
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  bygging:
+  forberedelse:
     runs-on:
       - self-hosted
-      - macOS
-    concurrency:
-      group: integrasjonspunkt-production-build
-      cancel-in-progress: true
-    environment: production
     outputs:
-      sha_short: ${{ steps.build_vars.outputs.sha_short }}
       appVersion: ${{ steps.build_vars.outputs.appVersion }}
-
+      sha_short: ${{ steps.build_vars.outputs.sha_short }}
+      build_date: ${{ steps.build_vars.outputs.build_date }}
+      build_date_long: ${{ steps.build_vars.outputs.build_date_long }}
     steps:
-
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Sett byggevariabler
+      id: build_vars
       run: |
+        curl -Lso maven-metadata.xml "${{ env.mavenRepo }}/maven-metadata.xml"
         appVersion=$(sed -ne '/latest/{s/.*<latest>\(.*\)<\/latest>.*/\1/p;q;}' <<< cat maven-metadata.xml)
         if [[ "$appVersion" =~ "beta" ]]; then
           appVersion=${{ vars.JAR_VERSION }}
@@ -46,13 +43,17 @@ jobs:
         echo "build_date=$(date '+%Y%m%d')" >> $GITHUB_OUTPUT
         echo "build_date_long=$(date '+%Y%m%d_%H%M')" >> $GITHUB_OUTPUT
         echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-        curl -Lso maven-metadata.xml "${{ env.mavenRepo }}/maven-metadata.xml"
+        mkdir -p cache
 
-      id: build_vars
-
-
-    - name: Lås opp nøkkelring
-      run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
+    - name: Hent henter inn bygde filer fra cache
+      id: app-cache
+      uses: actions/cache@v4
+      env:
+        cache-name: ip-app-cache
+      with:
+        path: ./cache
+        key: ${{env.cache-name}}-${{ steps.build_vars.outputs.appVersion }}
+        restore-keys: ${{ env.cache-name }}-
 
     - name: Innlogging til Azure CLI (OIDC)
       uses: azure/login@v2
@@ -61,46 +62,21 @@ jobs:
         tenant-id: ${{ vars.AZURE_TENANT_ID }}
         subscription-id: ${{ vars.AZURE_SUBID_INTERNAL }}
 
-
-    - name: Login to ACR
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ vars.ACR }}
-        username: ${{ vars.ACRTOKENNAME }}
-        password: ${{ secrets.ACRTOKEN }}
-
-    # - name: Logg inn på registry
-    #   run: |
-    #     acrname=${{ vars.ACR }}
-    #     shortname="${acrname%%.*}"
-    #     az acr login -n $shortname
-
     - name: Henter virksomhetssertifikat fra Key Vault og setter passord på det
       run: |
         az keyvault secret download --encoding base64 --name ${{ vars.AZURE_KV_CERT_NAME }} --file vs.p12 --vault-name ${{ vars.KEYVAULT_NAME }}
         openssl pkcs12 -in vs.p12 -passin pass: -nodes -out vs-auth.pem
+        rm ${{ vars.KEYSTORE_FILE }}
         openssl pkcs12 -export -in vs-auth.pem -out ${{ vars.KEYSTORE_FILE }} -passout pass:${{secrets.KEYSTORE_PASS}} -name ${{vars.KEYSTORE_ALIAS}}
         rm vs-auth.pem vs.p12
-
-    - name: Hent integrasjonspunktets jar-fil fra cache
-      id: app-cache
-      uses: actions/cache@v4
-      env:
-        cache-name: app-cache
-      with:
-        path: ./app.jar
-        key: ${{env.cache-name}}-${{ steps.getAppVersion.outputs.appVersion }}
-        restore-keys: ${{ env.cache-name }}-
     
-    - name: Last ned integrasjonspunktets jar-fil
+    - name: Last ned integrasjonspunktets jar-fil og CA-sertifikater
       if: steps.app-cache.outputs.cache-hit != 'true'
-      run: curl -Lso ./app.jar ${{ env.mavenRepo }}/${{ steps.build_vars.outputs.appVersion }}/integrasjonspunkt-${{ steps.build_vars.outputs.appVersion }}.jar
-
-    - name: Hent inn CA-sertifikater
-      run: |
-        curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "${{ env.certsUrl }}/BPClass3RootCA.cer"
-        curl -Lso docker/trustcerts/CommfidesClass3RootCA.cer "${{ env.certsUrl }}/cpn%20rootca%20sha256%20class%203.crt"
-        openssl s_client -connect ${{vars.ALTINN_HOST}}:${{env.altinnPort}} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > docker/trustcerts/${{vars.ALTINN_HOST}}.cer
+      run: | 
+        curl -Lso cache/app.jar ${{ env.mavenRepo }}/${{ steps.build_vars.outputs.appVersion }}/integrasjonspunkt-${{ steps.build_vars.outputs.appVersion }}.jar
+        curl -Lso cache/trustcerts/BuyPassClass3RootCA.cer "${{ env.certsUrl }}/BPClass3RootCA.cer"
+        curl -Lso cache/trustcerts/CommfidesClass3RootCA.cer "${{ env.certsUrl }}/cpn%20rootca%20sha256%20class%203.crt"
+        openssl s_client -connect ${{vars.ALTINN_HOST}}:${{env.altinnPort}} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > cache/trustcerts/${{vars.ALTINN_HOST}}.cer
 
     - name: Befolker properties og motd
       env:
@@ -142,8 +118,64 @@ jobs:
         MAIL_PASSWORD: ${{secrets.MAIL_PASSWORD}}
         MESSAGE_TTL: ${{ vars.MESSAGE_TTL || env.default_ttl }}
       run: |
-        envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
-        envsubst < "docker/motd.template" > "docker/motd.sh"
+        rm cache/integrasjonspunkt-local.properties cache/motd.sh
+        envsubst < "integrasjonspunkt-local.properties.dist" > "cache/integrasjonspunkt-local.properties"
+        envsubst < "docker/motd.template" > "cache/motd.sh"
+
+  bygging:
+    needs: forberedelse
+    strategy:
+      matrix:
+        environment:
+          - production
+          - staging
+    runs-on:
+      - self-hosted
+      - macOS
+    concurrency:
+      group: integrasjonspunkt-${{ matrix.environment }}-build
+      cancel-in-progress: true
+    outputs:
+      sha_short: ${{ needs.forberedelse.outputs.sha_short }}
+      appVersion: ${{ needs.forberedelse.outputs.appVersion }}
+
+    steps:
+
+    - uses: actions/checkout@v6
+
+    - name: Hent henter inn bygde filer fra cache
+      id: app-cache
+      uses: actions/cache@v4
+      env:
+        cache-name: ip-app-cache
+      with:
+        path: ./cache
+        key: ${{env.cache-name}}-${{ needs.forberedelse.outputs.appVersion }}
+        restore-keys: ${{ env.cache-name }}-
+
+    - name: Lås opp nøkkelring
+      run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
+
+    - name: Innlogging til Azure CLI (OIDC)
+      uses: azure/login@v2
+      with:
+        client-id: ${{ vars.DIBK_GITHUBACTIONS_SP_ID }}
+        tenant-id: ${{ vars.AZURE_TENANT_ID }}
+        subscription-id: ${{ vars.AZURE_SUBID_INTERNAL }}
+
+    - name: Login to ACR
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ vars.ACR }}
+        username: ${{ vars.ACRTOKENNAME }}
+        password: ${{ secrets.ACRTOKEN }}
+
+    # - name: Logg inn på registry
+    #   run: |
+    #     acrname=${{ vars.ACR }}
+    #     shortname="${acrname%%.*}"
+    #     az acr login -n $shortname
+
 
     - name: Setter metadata for Docker
       id: meta
@@ -155,10 +187,8 @@ jobs:
         # generate Docker tags based on the following events/attributes
         tags: |
           # Kort SHA > 'sha-xxxxxx'
-          type=sha,prefix=${{ vars.APP_ENV }}-,format=short
-          # set latest tag for production branch
-          type=raw,value=latest
-          type=raw,value=${{steps.getAppVersion.outputs.appVersion}}-${{ vars.APP_ENV }}
+          type=sha,prefix=${{ matrix.environment }}-,format=short
+          type=raw,value=${{needs.forberedelse.outputs.appVersion}}-${{ matrix.environment }}
 
     - name: Oppsett av Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -189,9 +219,9 @@ jobs:
 
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=registry,ref=${{ vars.ACR }}${{ env.acrPath }}:${{ vars.APP_ENV }}-buildcache
-        cache-to: type=registry,ref=${{ vars.ACR }}${{ env.acrPath }}:${{ vars.APP_ENV }}-buildcache,mode=max
-  
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
     - name: Feilmelding til Teams
       if: failure()
       uses: carriquiry-g/ms-teams-notification@v2 # https://github.com/marketplace/actions/microsoft-teams-channel-notification
@@ -203,30 +233,35 @@ jobs:
         timezone: Europe/Oslo
         verbose-logging: false
 
-  utrulling:
-    runs-on: self-hosted
-    needs: bygging
-    environment: 
-      name: production
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+  # utrulling:
+  #   runs-on: self-hosted
+  #   needs: bygging
+  #   strategy:
+  #     matrix:
+  #       environment:
+  #         - production
+  #         - staging
+  #   environment: 
+  #     name: ${{ matrix.environment }}
+  #     url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
-    steps:
-    - name: Deploy to Azure Web App
-      id: deploy-to-webapp
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'dibk-ip-prod'
-        slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_8e31a0a286fe4f0a9fc10228293a10a9 }}
-        images: '${{ vars.ACR }}${{ env.acrPath }}:${{ vars.APP_ENV }}-${{needs.bygging.outputs.sha_short}}'
+  #   steps:
+  #   - name: Deploy to Azure Web App
+  #     id: deploy-to-webapp
+  #     uses: azure/webapps-deploy@v2
+  #     with:
+  #       app-name: 'dibk-ip-prod'
+  #       slot-name: ${{ matrix.environment }}
+  #       publish-profile: ${{ secrets.AzureAppService_PublishProfile_8e31a0a286fe4f0a9fc10228293a10a9 }}
+  #       images: '${{ vars.ACR }}${{ env.acrPath }}:${{ vars.APP_ENV }}-${{needs.bygging.outputs.sha_short}}'
 
-    - name: Feilmelding til Teams
-      if: failure()
-      uses: carriquiry-g/ms-teams-notification@v2 # https://github.com/marketplace/actions/microsoft-teams-channel-notification
-      with:
-        github-token: ${{ github.token }} # this will use the runner's token.
-        ms-teams-webhook-uri: ${{ secrets.TEAMS_DRIFTSMELDINGER_WEBHOOK_URI }}
-        notification-summary: Feil under utrulling til Azure
-        notification-style: attention
-        timezone: Europe/Oslo
-        verbose-logging: false
+  #   - name: Feilmelding til Teams
+  #     if: failure()
+  #     uses: carriquiry-g/ms-teams-notification@v2 # https://github.com/marketplace/actions/microsoft-teams-channel-notification
+  #     with:
+  #       github-token: ${{ github.token }} # this will use the runner's token.
+  #       ms-teams-webhook-uri: ${{ secrets.TEAMS_DRIFTSMELDINGER_WEBHOOK_URI }}
+  #       notification-summary: '${{ matrix.environment }}: Feil under utrulling til Azure'
+  #       notification-style: attention
+  #       timezone: Europe/Oslo
+  #       verbose-logging: false
