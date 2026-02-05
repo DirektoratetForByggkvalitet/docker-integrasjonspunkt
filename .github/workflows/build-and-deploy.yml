@@ -74,6 +74,7 @@ jobs:
         environment:
           - production
           - staging
+    environment: ${{ matrix.environment }}
     runs-on:
       - self-hosted
       - macOS
@@ -129,7 +130,7 @@ jobs:
         openssl pkcs12 -export -in vs-auth.pem -out ${{ vars.KEYSTORE_FILE }} -passout pass:${{secrets.KEYSTORE_PASS}} -name ${{vars.KEYSTORE_ALIAS}}
         rm vs-auth.pem vs.p12
     
-    - name: Last ned integrasjonspunktets jar-fil og CA-sertifikater
+    - name: Last ned CA-sertifikater
       if: steps.app-cache.outputs.cache-hit != 'true'
       run: | 
         curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "${{ env.certsUrl }}/BPClass3RootCA.cer"
