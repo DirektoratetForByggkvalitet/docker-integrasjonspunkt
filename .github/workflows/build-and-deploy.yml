@@ -176,7 +176,6 @@ jobs:
         MAIL_PASSWORD: ${{secrets.MAIL_PASSWORD}}
         MESSAGE_TTL: ${{ vars.MESSAGE_TTL || env.default_ttl }}
       run: |
-        rm cache/integrasjonspunkt-local.properties cache/motd.sh
         envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
         envsubst < "docker/motd.template" > "docker/motd.sh"
 
