@@ -126,7 +126,6 @@ jobs:
       run: |
         az keyvault secret download --encoding base64 --name ${{ vars.AZURE_KV_CERT_NAME }} --file vs.p12 --vault-name ${{ vars.KEYVAULT_NAME }}
         openssl pkcs12 -in vs.p12 -passin pass: -nodes -out vs-auth.pem
-        rm ${{ vars.KEYSTORE_FILE }}
         openssl pkcs12 -export -in vs-auth.pem -out ${{ vars.KEYSTORE_FILE }} -passout pass:${{secrets.KEYSTORE_PASS}} -name ${{vars.KEYSTORE_ALIAS}}
         rm vs-auth.pem vs.p12
     
