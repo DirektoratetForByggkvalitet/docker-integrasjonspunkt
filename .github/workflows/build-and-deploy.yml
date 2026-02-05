@@ -49,11 +49,16 @@ jobs:
       id: app-cache
       uses: actions/cache@v4
       env:
-        cache-name: ip-app-cache
+        cache-name: ip-app-jar
       with:
-        path: ./cache
+        path: ./app.jar
         key: ${{env.cache-name}}-${{ steps.build_vars.outputs.appVersion }}
         restore-keys: ${{ env.cache-name }}-
+
+    - name: Last ned integrasjonspunktets jar-fil og CA-sertifikater
+      if: steps.app-cache.outputs.cache-hit != 'true'
+      run: | 
+        curl -Lso ./app.jar ${{ env.mavenRepo }}/${{ steps.build_vars.outputs.appVersion }}/integrasjonspunkt-${{ steps.build_vars.outputs.appVersion }}.jar
 
     - name: Innlogging til Azure CLI (OIDC)
       uses: azure/login@v2
@@ -61,6 +66,60 @@ jobs:
         client-id: ${{ vars.DIBK_GITHUBACTIONS_SP_ID }}
         tenant-id: ${{ vars.AZURE_TENANT_ID }}
         subscription-id: ${{ vars.AZURE_SUBID_INTERNAL }}
+
+  bygging:
+    needs: forberedelse
+    strategy:
+      matrix:
+        environment:
+          - production
+          - staging
+    runs-on:
+      - self-hosted
+      - macOS
+    concurrency:
+      group: integrasjonspunkt-${{ matrix.environment }}-build
+      cancel-in-progress: true
+    outputs:
+      sha_short: ${{ needs.forberedelse.outputs.sha_short }}
+      appVersion: ${{ needs.forberedelse.outputs.appVersion }}
+
+    steps:
+
+    - uses: actions/checkout@v6
+
+    - name: Henter inn app.jar fra cache
+      id: app-cache
+      uses: actions/cache@v4
+      env:
+        cache-name: ip-app-jar
+      with:
+        path: ./app.jar
+        key: ${{env.cache-name}}-${{ needs.forberedelse.outputs.appVersion }}
+        restore-keys: ${{ env.cache-name }}-
+
+    - name: Lås opp nøkkelring
+      run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
+
+    - name: Innlogging til Azure CLI (OIDC)
+      uses: azure/login@v2
+      with:
+        client-id: ${{ vars.DIBK_GITHUBACTIONS_SP_ID }}
+        tenant-id: ${{ vars.AZURE_TENANT_ID }}
+        subscription-id: ${{ vars.AZURE_SUBID_INTERNAL }}
+
+    - name: Login to ACR
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ vars.ACR }}
+        username: ${{ vars.ACRTOKENNAME }}
+        password: ${{ secrets.ACRTOKEN }}
+
+    # - name: Logg inn på registry
+    #   run: |
+    #     acrname=${{ vars.ACR }}
+    #     shortname="${acrname%%.*}"
+    #     az acr login -n $shortname
 
     - name: Henter virksomhetssertifikat fra Key Vault og setter passord på det
       run: |
@@ -73,10 +132,9 @@ jobs:
     - name: Last ned integrasjonspunktets jar-fil og CA-sertifikater
       if: steps.app-cache.outputs.cache-hit != 'true'
       run: | 
-        curl -Lso cache/app.jar ${{ env.mavenRepo }}/${{ steps.build_vars.outputs.appVersion }}/integrasjonspunkt-${{ steps.build_vars.outputs.appVersion }}.jar
-        curl -Lso cache/trustcerts/BuyPassClass3RootCA.cer "${{ env.certsUrl }}/BPClass3RootCA.cer"
-        curl -Lso cache/trustcerts/CommfidesClass3RootCA.cer "${{ env.certsUrl }}/cpn%20rootca%20sha256%20class%203.crt"
-        openssl s_client -connect ${{vars.ALTINN_HOST}}:${{env.altinnPort}} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > cache/trustcerts/${{vars.ALTINN_HOST}}.cer
+        curl -Lso docker/trustcerts/BuyPassClass3RootCA.cer "${{ env.certsUrl }}/BPClass3RootCA.cer"
+        curl -Lso docker/trustcerts/CommfidesClass3RootCA.cer "${{ env.certsUrl }}/cpn%20rootca%20sha256%20class%203.crt"
+        openssl s_client -connect ${{vars.ALTINN_HOST}}:${{env.altinnPort}} < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > docker/trustcerts/${{vars.ALTINN_HOST}}.cer
 
     - name: Befolker properties og motd
       env:
@@ -119,63 +177,8 @@ jobs:
         MESSAGE_TTL: ${{ vars.MESSAGE_TTL || env.default_ttl }}
       run: |
         rm cache/integrasjonspunkt-local.properties cache/motd.sh
-        envsubst < "integrasjonspunkt-local.properties.dist" > "cache/integrasjonspunkt-local.properties"
-        envsubst < "docker/motd.template" > "cache/motd.sh"
-
-  bygging:
-    needs: forberedelse
-    strategy:
-      matrix:
-        environment:
-          - production
-          - staging
-    runs-on:
-      - self-hosted
-      - macOS
-    concurrency:
-      group: integrasjonspunkt-${{ matrix.environment }}-build
-      cancel-in-progress: true
-    outputs:
-      sha_short: ${{ needs.forberedelse.outputs.sha_short }}
-      appVersion: ${{ needs.forberedelse.outputs.appVersion }}
-
-    steps:
-
-    - uses: actions/checkout@v6
-
-    - name: Hent henter inn bygde filer fra cache
-      id: app-cache
-      uses: actions/cache@v4
-      env:
-        cache-name: ip-app-cache
-      with:
-        path: ./cache
-        key: ${{env.cache-name}}-${{ needs.forberedelse.outputs.appVersion }}
-        restore-keys: ${{ env.cache-name }}-
-
-    - name: Lås opp nøkkelring
-      run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
-
-    - name: Innlogging til Azure CLI (OIDC)
-      uses: azure/login@v2
-      with:
-        client-id: ${{ vars.DIBK_GITHUBACTIONS_SP_ID }}
-        tenant-id: ${{ vars.AZURE_TENANT_ID }}
-        subscription-id: ${{ vars.AZURE_SUBID_INTERNAL }}
-
-    - name: Login to ACR
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ vars.ACR }}
-        username: ${{ vars.ACRTOKENNAME }}
-        password: ${{ secrets.ACRTOKEN }}
-
-    # - name: Logg inn på registry
-    #   run: |
-    #     acrname=${{ vars.ACR }}
-    #     shortname="${acrname%%.*}"
-    #     az acr login -n $shortname
-
+        envsubst < "integrasjonspunkt-local.properties.dist" > "integrasjonspunkt-local.properties"
+        envsubst < "docker/motd.template" > "docker/motd.sh"
 
     - name: Setter metadata for Docker
       id: meta
