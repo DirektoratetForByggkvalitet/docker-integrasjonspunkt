@@ -41,7 +41,7 @@ jobs:
       - self-hosted
       - macOS
     concurrency:
-      group: integrasjonspunkt-${{ env.appVersion }}-build
+      group: integrasjonspunkt-build
       cancel-in-progress: true
 
     steps:
@@ -102,7 +102,7 @@ jobs:
         context: .
         build-args: |
           APP_VERSION=${{ env.appVersion }}
-          
+
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
