@@ -2,18 +2,18 @@ name: Bygg Staging og Production
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "4 7 */2 * *"
+  # schedule:
+  #   - cron: "4 7 */2 * *"
     
 env:
   acrPath: /app/integrasjonspunkt
   appDir: /app
   s6version: '3.2.1.0'
-  mavenRepo: 'https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt'
+  # mavenRepo: 'https://repo1.maven.org/maven2/no/difi/meldingsutveksling/integrasjonspunkt'
   certsUrl: 'https://github.com/felleslosninger/docs/raw/gh-pages/resources/begrep/sikkerDigitalPost/sikkerhet/sertifikater/prod'
   altinnPort: 443
   default_ttl: '24'
-  platforms: 'linux/amd64,linux/arm64'
+  platforms: 'linux/amd64' # ,linux/arm64'
 
 permissions:
   id-token: write
@@ -24,7 +24,7 @@ jobs:
     runs-on:
       - self-hosted
     outputs:
-      appVersion: ${{ steps.build_vars.outputs.appVersion }}
+      appVersion: ${{ var.APP_VERSION }}
       sha_short: ${{ steps.build_vars.outputs.sha_short }}
       build_date: ${{ steps.build_vars.outputs.build_date }}
       build_date_long: ${{ steps.build_vars.outputs.build_date_long }}
@@ -60,19 +60,13 @@ jobs:
       run: | 
         curl -Lso ./app.jar ${{ env.mavenRepo }}/${{ steps.build_vars.outputs.appVersion }}/integrasjonspunkt-${{ steps.build_vars.outputs.appVersion }}.jar
 
-    - name: Innlogging til Azure CLI (OIDC)
-      uses: azure/login@v2
-      with:
-        client-id: ${{ vars.DIBK_GITHUBACTIONS_SP_ID }}
-        tenant-id: ${{ vars.AZURE_TENANT_ID }}
-        subscription-id: ${{ vars.AZURE_SUBID_INTERNAL }}
 
   bygging:
     needs: forberedelse
     strategy:
       matrix:
         environment:
-          - production
+          # - production
           - staging
     environment: ${{ matrix.environment }}
     runs-on:
@@ -81,9 +75,6 @@ jobs:
     concurrency:
       group: integrasjonspunkt-${{ matrix.environment }}-build
       cancel-in-progress: true
-    outputs:
-      sha_short: ${{ needs.forberedelse.outputs.sha_short }}
-      appVersion: ${{ needs.forberedelse.outputs.appVersion }}
 
     steps:
 
@@ -96,7 +87,7 @@ jobs:
         cache-name: ip-app-jar
       with:
         path: ./app.jar
-        key: ${{env.cache-name}}-${{ needs.forberedelse.outputs.appVersion }}
+        key: ${{env.cache-name}}-${{ matrix.environment }}-${{vars.APP_VERSION }}
         restore-keys: ${{ env.cache-name }}-
 
     - name: Lås opp nøkkelring
@@ -115,6 +106,14 @@ jobs:
         registry: ${{ vars.ACR }}
         username: ${{ vars.ACRTOKENNAME }}
         password: ${{ secrets.ACRTOKEN }}
+
+    - uses: azure/appservice-settings@v1
+      with:
+        app-name: 'my-app'
+        # slot-name: ${{ matrix.environment }}  # Optional and needed only if the settings have to be configured on the specific deployment slot
+        app-settings-json: '${{ secrets.APP_SETTINGS }}' 
+        connection-strings-json: '${{ secrets.CONNECTION_STRINGS }}'
+      id: settings
 
     # - name: Logg inn på registry
     #   run: |

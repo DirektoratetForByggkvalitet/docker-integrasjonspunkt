@@ -1,0 +1,153 @@
+name: Bygg Staging og Production
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "4 7 */2 * *"
+    
+env:
+  appVersion: 'v4.0.0'
+  default_ttl: '24'
+  platforms: 'linux/amd64' # ,linux/arm64'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  forberedelse:
+    runs-on:
+      - self-hosted
+    outputs:
+      sha_short: ${{ steps.build_vars.outputs.sha_short }}
+      build_date: ${{ steps.build_vars.outputs.build_date }}
+      build_date_long: ${{ steps.build_vars.outputs.build_date_long }}
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Sett byggevariabler
+      id: build_vars
+      run: |
+        curl -Lso maven-metadata.xml "${{ env.mavenRepo }}/maven-metadata.xml"
+        echo "appVersion=${appVersion}" >> $GITHUB_OUTPUT
+        echo "build_date=$(date '+%Y%m%d')" >> $GITHUB_OUTPUT
+        echo "build_date_long=$(date '+%Y%m%d_%H%M')" >> $GITHUB_OUTPUT
+        echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        mkdir -p cache
+
+  bygging:
+    needs: forberedelse
+    runs-on:
+      - self-hosted
+      - macOS
+    concurrency:
+      group: integrasjonspunkt-${{ env.appVersion }}-build
+      cancel-in-progress: true
+
+    steps:
+
+    - uses: actions/checkout@v6
+
+    - name: Lås opp nøkkelring
+      run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
+
+    - uses: azure/appservice-settings@v1
+      with:
+        app-name: 'my-app'
+        # slot-name: ${{ matrix.environment }}  # Optional and needed only if the settings have to be configured on the specific deployment slot
+        app-settings-json: '${{ secrets.APP_SETTINGS }}' 
+        connection-strings-json: '${{ secrets.CONNECTION_STRINGS }}'
+      id: settings
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setter metadata for Docker
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+          # list of Docker images to use as base name for tags
+        images: |
+          ghcr.io/${{ github.repository }}       
+        # generate Docker tags based on the following events/attributes
+        tags: |
+          # Kort SHA > 'sha-xxxxxx'
+          type=sha,format=short
+          type=raw,value=${{needs.forberedelse.outputs.appVersion}}
+          type=latest
+
+    - name: Oppsett av Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        name: integrasjonspunkt-builder
+        driver: docker-container
+
+    # - name: Login to Docker Hub
+    #   uses: docker/login-action@v3
+    #   with:
+    #     registry: ${{ vars.ACR }}
+    #     username: ${{ vars.ACRTOKENNAME }}
+    #     password: ${{ secrets.ACRTOKEN }}
+
+    - name: Bygg og push
+      uses: docker/build-push-action@v6
+      with:
+        platforms: ${{ env.platforms }}
+        push: true
+        file: docker/Dockerfile
+        context: .
+        build-args: |
+          APP_VERSION=${{ env.appVersion }}
+          
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Feilmelding til Teams
+      if: failure()
+      uses: carriquiry-g/ms-teams-notification@v2 # https://github.com/marketplace/actions/microsoft-teams-channel-notification
+      with:
+        github-token: ${{ github.token }} # this will use the runner's token.
+        ms-teams-webhook-uri: ${{ secrets.TEAMS_DRIFTSMELDINGER_WEBHOOK_URI }}
+        notification-summary: Feil under bygging av Docker-image
+        notification-style: attention
+        timezone: Europe/Oslo
+        verbose-logging: false
+
+  # utrulling:
+  #   runs-on: self-hosted
+  #   needs: bygging
+  #   strategy:
+  #     matrix:
+  #       environment:
+  #         - production
+  #         - staging
+  #   environment: 
+  #     name: ${{ matrix.environment }}
+  #     url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+  #   steps:
+  #   - name: Deploy to Azure Web App
+  #     id: deploy-to-webapp
+  #     uses: azure/webapps-deploy@v2
+  #     with:
+  #       app-name: 'dibk-ip-prod'
+  #       slot-name: ${{ matrix.environment }}
+  #       publish-profile: ${{ secrets.AzureAppService_PublishProfile_8e31a0a286fe4f0a9fc10228293a10a9 }}
+  #       images: '${{ vars.ACR }}${{ env.acrPath }}:${{ vars.APP_ENV }}-${{needs.bygging.outputs.sha_short}}'
+
+  #   - name: Feilmelding til Teams
+  #     if: failure()
+  #     uses: carriquiry-g/ms-teams-notification@v2 # https://github.com/marketplace/actions/microsoft-teams-channel-notification
+  #     with:
+  #       github-token: ${{ github.token }} # this will use the runner's token.
+  #       ms-teams-webhook-uri: ${{ secrets.TEAMS_DRIFTSMELDINGER_WEBHOOK_URI }}
+  #       notification-summary: '${{ matrix.environment }}: Feil under utrulling til Azure'
+  #       notification-style: attention
+  #       timezone: Europe/Oslo
+  #       verbose-logging: false
