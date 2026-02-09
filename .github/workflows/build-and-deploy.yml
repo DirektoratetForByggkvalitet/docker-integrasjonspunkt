@@ -24,7 +24,7 @@ jobs:
     runs-on:
       - self-hosted
     outputs:
-      appVersion: ${{ var.APP_VERSION }}
+      appVersion: ${{ vars.APP_VERSION }}
       sha_short: ${{ steps.build_vars.outputs.sha_short }}
       build_date: ${{ steps.build_vars.outputs.build_date }}
       build_date_long: ${{ steps.build_vars.outputs.build_date_long }}
