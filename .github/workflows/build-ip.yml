@@ -28,8 +28,6 @@ jobs:
     - name: Sett byggevariabler
       id: build_vars
       run: |
-        curl -Lso maven-metadata.xml "${{ env.mavenRepo }}/maven-metadata.xml"
-        echo "appVersion=${appVersion}" >> $GITHUB_OUTPUT
         echo "build_date=$(date '+%Y%m%d')" >> $GITHUB_OUTPUT
         echo "build_date_long=$(date '+%Y%m%d_%H%M')" >> $GITHUB_OUTPUT
         echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
