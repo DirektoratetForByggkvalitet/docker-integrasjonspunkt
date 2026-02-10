@@ -58,6 +58,11 @@ jobs:
     #     connection-strings-json: '${{ secrets.CONNECTION_STRINGS }}'
     #   id: settings
 
+    - name: Sett integrasjonspunkt-local.properties
+      run: |
+        echo "app.logger.destination=logs.eformidling.no:80" > integrasjonspunkt-local.properties
+        echo "app.logger.secureLogstash=false" >> integrasjonspunkt-local.properties
+
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v3
       with:

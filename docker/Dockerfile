@@ -6,5 +6,6 @@ ENV APP_VERSION=${APP_VERSION}
 LABEL no.digdir.integrasjonspunkt.version="${APP_VERSION}"
 
 # RUN mkdir -p /logstash
-ADD https://github.com/felleslosninger/efm-integrasjonspunkt/raw/refs/heads/main/integrasjonspunkt/src/main/resources/logstash/client.p12 /logstash/
-ADD https://github.com/felleslosninger/efm-integrasjonspunkt/raw/refs/heads/main/integrasjonspunkt/src/main/resources/logstash/truststore.jks /logstash/
+# ADD https://github.com/felleslosninger/efm-integrasjonspunkt/raw/refs/heads/main/integrasjonspunkt/src/main/resources/logstash/client.p12 /logstash/
+# ADD https://github.com/felleslosninger/efm-integrasjonspunkt/raw/refs/heads/main/integrasjonspunkt/src/main/resources/logstash/truststore.jks /logstash/
+ADD integrasjonspunkt-local.properties /workspace/
