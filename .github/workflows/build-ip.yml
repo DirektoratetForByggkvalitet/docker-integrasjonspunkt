@@ -1,4 +1,4 @@
-name: Bygg Staging og Production
+name: Bygg v4 image
 
 on:
   workflow_dispatch:
