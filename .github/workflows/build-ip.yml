@@ -76,7 +76,7 @@ jobs:
           # Kort SHA > 'sha-xxxxxx'
           type=sha,format=short
           type=raw,value=${{needs.forberedelse.outputs.appVersion}}
-          type=latest
+          type=raw,value=latest
 
     - name: Oppsett av Docker Buildx
       uses: docker/setup-buildx-action@v3
