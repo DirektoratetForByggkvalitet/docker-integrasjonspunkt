@@ -49,13 +49,13 @@ jobs:
     - name: Lås opp nøkkelring
       run: security -v unlock-keychain -p ${{ secrets.MACOS_KC_PASS }} ~/Library/Keychains/login.keychain-db
 
-    - uses: azure/appservice-settings@v1
-      with:
-        app-name: 'my-app'
-        # slot-name: ${{ matrix.environment }}  # Optional and needed only if the settings have to be configured on the specific deployment slot
-        app-settings-json: '${{ secrets.APP_SETTINGS }}' 
-        connection-strings-json: '${{ secrets.CONNECTION_STRINGS }}'
-      id: settings
+    # - uses: azure/appservice-settings@v1
+    #   with:
+    #     app-name: 'my-app'
+    #     # slot-name: ${{ matrix.environment }}  # Optional and needed only if the settings have to be configured on the specific deployment slot
+    #     app-settings-json: '${{ secrets.APP_SETTINGS }}' 
+    #     connection-strings-json: '${{ secrets.CONNECTION_STRINGS }}'
+    #   id: settings
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v3
