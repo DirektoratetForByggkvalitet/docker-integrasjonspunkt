@@ -1,6 +1,2 @@
-*.jks
 *.properties
 /persisted
-*.pem
-*.p12
-*.pkcs12
