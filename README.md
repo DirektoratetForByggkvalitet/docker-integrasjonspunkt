@@ -1,4 +1,4 @@
-# LES MEG
+## OBSOLETE: Avviklet ifm v4.0 av efm-integrasjonspunkt
 
 Docker-image som kjører DiBK sitt integrasjonspunkt mot Digdir i Azure. 
 
